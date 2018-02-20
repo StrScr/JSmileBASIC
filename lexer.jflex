@@ -23,14 +23,14 @@ import java_cup.runtime.*;
        case. */
     private Symbol symbol(int type) {
         //System.out.print("<"+type+":"+yytext()+">");
-        return new symbol(type, yyline, yycolumn);
+        return new Symbol(type, yyline, yycolumn);
     }
     
     /* Also creates a new java_cup.runtime.Symbol with information
        about the current token, but this object has a value. */
     private Symbol symbol(int type, Object value) {
         //System.out.print("<"+type+":"+yytext()+">");
-        return new symbol(type, yyline, yycolumn, value);
+        return new Symbol(type, yyline, yycolumn, value);
     }
 %}
 
