@@ -39,10 +39,10 @@ import java_cup.runtime.*;
 */
 LineEnd = \r|\n|\r\n
 InputChar = [^\r\n]
-Whitespace = {LineEnd}|[ \t\f]
+Whitespace = [ \t\f]
 BaseIdentifier = [A-Za-z_][A-Za-z_0-9]*
 Comment = ("'"|"rem "){InputChar}*{LineEnd}?
-NumberLiteral = [0-9]*
+NumberLiteral = [0-9]+
 
 %%
 
@@ -134,8 +134,8 @@ NumberLiteral = [0-9]*
     /*
         Ignored
     */
-    {Whitespace}{}
-    {Comment}   {}
+    {Whitespace}    {}
+    {Comment}       {}
 }
 
 //Anything that doesn't match
