@@ -119,6 +119,11 @@ StringCharacter = [^\r\n\"]
     "&&"    {return symbol(sym.ANDAND);}
     "||"    {return symbol(sym.OROR);}
 
+    "+"     {return symbol(sym.PLUS);}
+    "-"     {return symbol(sym.MINUS);}
+    "*"     {return symbol(sym.MULT);}
+    "/"     {return symbol(sym.DIV);}
+
     /*
         Numeric Literals
     */
