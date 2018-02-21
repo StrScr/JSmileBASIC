@@ -6,7 +6,7 @@
 package jsmilebasic;
 
 import java.io.*;
-import java.io.IOException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java_cup.parser;
@@ -59,8 +59,6 @@ public class main {
         } catch (Exception ex) {
             Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        
     }
     
 }
