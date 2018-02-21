@@ -1,0 +1,76 @@
+package jsmilebasic;
+import java.io.*;
+import java_cup.runtime.*;
+
+parser code
+{:
+	public void syntax_error(Symbol s){
+		report_error("Error de sintaxis. Linea: " + (s.right + 1) +
+		" Columna: " + s.left + ". Texto: \"" + s.value + "\"", null);
+	}
+        public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception 
+        {
+         //report_fatal_error("Fatal Error: " + s.value, null);
+        }
+       
+
+
+:}
+
+
+/* Terminals Tokens */
+
+terminal IF;
+terminal THEN;
+terminal ELSE;
+terminal ELSEIF;
+terminal ENDIF;
+terminal TO;
+terminal STEP;
+terminal FOR;
+terminal NEXT;
+terminal WHILE;
+terminal WEND;
+terminal REPEAT;
+terminal UNTIL;
+terminal CONTINUE;
+terminal BREAK;
+terminal STOP;
+terminal DEF;
+terminal RETURN;
+terminal OUT;
+terminal END;
+terminal VAR;
+terminal DIM;
+terminal INC;
+terminal DEC;
+terminal SWAP;
+terminal PRINT;
+terminal TRUE;
+terminal FALSE;
+terminal LPAREN;
+terminal RPAREN;
+terminal LBRACK;
+terminal RBRACK;
+terminal COMMA;
+terminal COLON;
+terminal EQ;
+terminal EQEQ;
+terminal NOTEQ;
+terminal LT;
+terminal LTEQ;
+terminal GT;
+terminal GTEQ;
+terminal NOT;
+terminal ANDAND;
+terminal OROR;
+terminal NUMBER;
+terminal IDENTIFIER_STRING;
+terminal IDENTIFIER_DECIMAL;
+terminal IDENTIFIER_INTEGER;
+terminal LINEEND;
+
+
+non terminal empty;
+
+empty ::= /* nothing */;

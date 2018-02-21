@@ -1,0 +1,6 @@
+A = 10
+WHILE A>0
+    PRINT A
+    A = A - 1
+WEND
+PRINT "END"
