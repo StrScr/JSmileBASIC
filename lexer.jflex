@@ -17,7 +17,9 @@ import java_cup.runtime.*;
 %column
 %line
 
-%{   
+%{
+    StringBuilder string = new StringBuilder();
+
     /* Create a new java_cup.runtime.Symbol with information about
        the current token, the token will have no value in this
        case. */
@@ -43,6 +45,9 @@ Whitespace = [ \t\f]
 BaseIdentifier = [A-Za-z_][A-Za-z_0-9]*
 Comment = ("'"|"rem "){InputChar}*{LineEnd}?
 NumberLiteral = [0-9]+
+StringCharacter = [^\r\n\"]
+
+%state STRING
 
 %%
 
@@ -120,6 +125,11 @@ NumberLiteral = [0-9]+
     {NumberLiteral}       {return symbol(sym.NUMBER, yytext());}
 
     /*
+        string literal
+    */
+    \"      {yybegin(STRING); string.setLength(0);}
+
+    /*
         Identifiers
     */
     {BaseIdentifier}"$"   {return symbol(sym.IDENTIFIER_STRING, yytext());}//String
@@ -136,6 +146,27 @@ NumberLiteral = [0-9]+
     */
     {Whitespace}    {}
     {Comment}       {}
+}
+
+<STRING> {
+  \"                             { yybegin(YYINITIAL); return symbol(sym.STRING_LITERAL, string.toString()); }
+  
+  {StringCharacter}+             { string.append( yytext() ); }
+  
+  /* escape sequences *
+  "\\b"                          { string.append( '\b' ); }
+  "\\t"                          { string.append( '\t' ); }
+  "\\n"                          { string.append( '\n' ); }
+  "\\f"                          { string.append( '\f' ); }
+  "\\r"                          { string.append( '\r' ); }
+  "\\\""                         { string.append( '\"' ); }
+  "\\'"                          { string.append( '\'' ); }
+  "\\\\"                         { string.append( '\\' ); }
+  
+  /* error cases *
+  \\.                            { throw new RuntimeException("Illegal escape sequence \""+yytext()+"\""); }
+  */
+  {LineEnd}                      { throw new RuntimeException("Unterminated string at end of line "+yyline);}
 }
 
 //Anything that doesn't match
