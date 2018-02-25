@@ -1,0 +1,7 @@
+VAR nb=4
+VAR B=E[nb]
+FOR (VAR i=0 i<15 i++)
+    B[i]=E(nb)
+    PRINT B[i]
+STOP
+END
