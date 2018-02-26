@@ -66,6 +66,7 @@ StringCharacter = [^\r\n\"]
     "swap"      {System.out.println("<SWAP>");}
 
     "print"     {System.out.println("<PRINT>");}
+    "?"         {System.out.println("<QUESTION>")}
 
     /*
         Boolean Literals
@@ -82,6 +83,7 @@ StringCharacter = [^\r\n\"]
     "]"     {System.out.println("<RBRACK>");}
     ","     {System.out.println("<COMMA>");}
     ":"     {System.out.println("<COLON>");}
+    ";"     {System.out.println("<SEMICOLON>");}
 
     /*
         Operators
