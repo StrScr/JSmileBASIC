@@ -106,6 +106,14 @@ StringCharacter = [^\r\n\"]
     "MOD"   {System.out.println("<MOD>");}
     "DIV"   {System.out.println("<INTEGER_DIV>");}
 
+    "AND"   {System.out.println("<BIT_AND>");}
+    "OR"    {System.out.println("<BIT_OR>");}
+    "XOR"   {System.out.println("<BIT_XOR>");}
+    "NOT"   {System.out.println("<BIT_NOT>");}
+
+    "<<"    {System.out.println("<LSHIFT>");}
+    ">>"    {System.out.println("<RSHIFT>");}
+
     /*
         Numeric Literals
     */
