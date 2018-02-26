@@ -59,6 +59,9 @@ StringCharacter = [^\r\n\"]
     "out"       {System.out.println("<OUT>");}
     "end"       {System.out.println("<END>");}
 
+    "goto"      {System.out.println("<GOTO>");}
+    "gosub"     {System.out.println("<GOSUB>");}
+
     "var"       {System.out.println("<VAR>");}
     "dim"       {System.out.println("<DIM>");}
     "inc"       {System.out.println("<INC>");}
