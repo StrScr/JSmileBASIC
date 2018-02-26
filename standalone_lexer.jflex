@@ -118,8 +118,8 @@ StringCharacter = [^\r\n\"]
         Identifiers
     */
     {BaseIdentifier}"$"   {System.out.println("<IDENTIFIER_STRING, " + yytext() + ">");}//String
-    {BaseIdentifier}"%"   {System.out.println("<IDENTIFIER_DECIMAL, " + yytext() + ">");}//Decimal
-    {BaseIdentifier}"#"?  {System.out.println("<IDENTIFIER_INTEGER, " + yytext() + ">");}//Integer
+    {BaseIdentifier}"#"   {System.out.println("<IDENTIFIER_DECIMAL, " + yytext() + ">");}//Decimal
+    {BaseIdentifier}"%"?  {System.out.println("<IDENTIFIER_INTEGER, " + yytext() + ">");}//Integer
 
     /*
         Line End
