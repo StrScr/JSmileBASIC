@@ -1,0 +1,28 @@
+NUM#=0
+WHILE (NUM# != 9)  
+    PRINT "Escoja un numero"
+    INPUT NUM#
+    IF NUM# == 1 THEN
+        COLOR$ = "Negro"
+    ELSEIF NUM# == 2 THEN
+        COLOR$ = "Rojo"
+    ELSEIF NUM# == 3 THEN
+        COLOR$ = "Verde"
+    ELSEIF NUM# == 4 THEN
+        COLOR$ = "Amarillo"
+    ELSEIF NUM# == 5 THEN
+        COLOR$ = "Azul"
+    ELSEIF NUM# == 6 THEN
+        COLOR$ = "Morado"
+    ELSEIF NUM# == 7 THEN
+        COLOR$ = "Azul Celeste"
+    ELSEIF NUM# == 8 THEN
+        COLOR$ = "Blanco"
+    ELSEIF NUM# == 9 THEN
+        PRINT "Salio del Menu"
+    ELSE
+        PRINT "Color invalido"
+    ENDIF
+    PRINT COLOR$
+WEND
+

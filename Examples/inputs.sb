@@ -1,0 +1,19 @@
+PRINT "TUS DATOS"
+
+INPUT "What is your username";USERNAME$
+PRINT USERNAME$
+
+INPUT "What is your password";Password$
+PRINT Password$
+
+INPUT "What is your country";COUNTRY$
+PRINT COUNTRY$
+
+INPUT "What is your email";EMAIL$
+PRINT EMAIL$
+
+INPUT "What is your age";AGE#
+PRINT AGE#
+
+INPUT "What is your phone";PHONE#
+PRINT PHONE#

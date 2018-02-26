@@ -1,7 +1,0 @@
-PRINT "Points ";P
-'Enemy
-SPSET 2, 1281
-SPOFS 2, EX, EY
-SPROT 2, 90
-WAIT 1
-GOTO @MAIN    
