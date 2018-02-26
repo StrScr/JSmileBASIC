@@ -1,0 +1,7 @@
+DEF fibo(VAR n,x,y)
+   IF (n<=1)
+      RETURN X+Y;
+   ELSE
+      RETURN fibo(ºn-1,~y,`x+y)
+   ENDIF
+END   
