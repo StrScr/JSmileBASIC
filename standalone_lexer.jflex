@@ -42,9 +42,9 @@ StringCharacter = [^\r\n\"]
     "elseif"    {System.out.println("<ELSEIF>");}
     "endif"     {System.out.println("<THEN>");}
 
+    "for"       {System.out.println("<FOR>");}
     "to"        {System.out.println("<TO>");}
     "step"      {System.out.println("<STEP>");}
-    "for"       {System.out.println("<FOR>");}
     "next"      {System.out.println("<NEXT>");}
     "while"     {System.out.println("<WHILE>");}
     "wend"      {System.out.println("<WEND>");}
