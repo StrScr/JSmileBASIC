@@ -105,13 +105,13 @@ StringCharacter = [^\r\n\"]
     "-"     {System.out.println("<MINUS>");}
     "*"     {System.out.println("<MULT>");}
     "/"     {System.out.println("<DIV>");}
-    "MOD"   {System.out.println("<MOD>");}
-    "DIV"   {System.out.println("<INTEGER_DIV>");}
+    "mod"   {System.out.println("<MOD>");}
+    "div"   {System.out.println("<INTEGER_DIV>");}
 
-    "AND"   {System.out.println("<BIT_AND>");}
-    "OR"    {System.out.println("<BIT_OR>");}
-    "XOR"   {System.out.println("<BIT_XOR>");}
-    "NOT"   {System.out.println("<BIT_NOT>");}
+    "and"   {System.out.println("<BIT_AND>");}
+    "or"    {System.out.println("<BIT_OR>");}
+    "xor"   {System.out.println("<BIT_XOR>");}
+    "not"   {System.out.println("<BIT_NOT>");}
 
     "<<"    {System.out.println("<LSHIFT>");}
     ">>"    {System.out.println("<RSHIFT>");}
