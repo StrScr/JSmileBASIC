@@ -103,6 +103,8 @@ StringCharacter = [^\r\n\"]
     "-"     {System.out.println("<MINUS>");}
     "*"     {System.out.println("<MULT>");}
     "/"     {System.out.println("<DIV>");}
+    "MOD"   {System.out.println("<MOD>");}
+    "DIV"   {System.out.println("<INTEGER_DIV>");}
 
     /*
         Numeric Literals
