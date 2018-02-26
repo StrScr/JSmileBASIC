@@ -132,6 +132,7 @@ StringCharacter = [^\r\n\"]
     {BaseIdentifier}"$"   {System.out.println("<IDENTIFIER_STRING, " + yytext() + ">");}//String
     {BaseIdentifier}"#"   {System.out.println("<IDENTIFIER_DECIMAL, " + yytext() + ">");}//Decimal
     {BaseIdentifier}"%"?  {System.out.println("<IDENTIFIER_INTEGER, " + yytext() + ">");}//Integer
+    "@"{BaseIdentifier}   {System.out.println("<LABEL, " + yytext() + ">");}//Label
 
     /*
         Line End
