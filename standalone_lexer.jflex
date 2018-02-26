@@ -25,6 +25,7 @@ Whitespace = [ \t\f]
 BaseIdentifier = [A-Za-z_][A-Za-z_0-9]*
 Comment = ("'"|"rem "){InputChar}*{LineEnd}?
 NumberLiteral = [0-9]+
+DecimalLiteral = {NumberLiteral}"."{NumberLiteral}
 StringCharacter = [^\r\n\"]
 
 %state STRING
@@ -123,6 +124,7 @@ StringCharacter = [^\r\n\"]
         Numeric Literals
     */
     {NumberLiteral}       {System.out.println("<NUMBER, " + yytext() + ">");}
+    {DecimalLiteral}      {System.out.println("<DECIMAL, " + yytext() + ">");}
 
     /*
         string literal
