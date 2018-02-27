@@ -41,6 +41,7 @@ StringCharacter = [^\r\n\"]
     "else"      {System.out.println("<ELSE>");}
     "elseif"    {System.out.println("<ELSEIF>");}
     "endif"     {System.out.println("<THEN>");}
+    "on"        {System.out.println("<ON>");}
 
     "for"       {System.out.println("<FOR>");}
     "to"        {System.out.println("<TO>");}
@@ -56,6 +57,8 @@ StringCharacter = [^\r\n\"]
     "stop"      {System.out.println("<STOP>");}
 
     "def"       {System.out.println("<DEF>");}
+    "common"    {System.out.println("<COMMON>");}
+    "call"      {System.out.println("<CALL>");}
     "return"    {System.out.println("<RETURN>");}
     "out"       {System.out.println("<OUT>");}
     "end"       {System.out.println("<END>");}
@@ -71,6 +74,16 @@ StringCharacter = [^\r\n\"]
 
     "print"     {System.out.println("<PRINT>");}
     "?"         {System.out.println("<QUESTION>");}
+
+    "input"     {System.out.println("<INPUT>");}
+    "linput"     {System.out.println("<LINPUT>");}
+
+    "read"      {System.out.println("<READ>");}
+    "data"      {System.out.println("<DATA>");}
+    "restore"   {System.out.println("<RESTORE>");}
+
+    "exec"      {System.out.println("<EXEC>");}
+    "use"       {System.out.println("<USE>");}
 
     /*
         Boolean Literals
