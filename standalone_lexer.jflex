@@ -76,7 +76,7 @@ StringCharacter = [^\r\n\"]
     "?"         {System.out.println("<QUESTION>");}
 
     "input"     {System.out.println("<INPUT>");}
-    "linput"     {System.out.println("<LINPUT>");}
+    "linput"    {System.out.println("<LINPUT>");}
 
     "read"      {System.out.println("<READ>");}
     "data"      {System.out.println("<DATA>");}
