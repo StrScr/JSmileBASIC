@@ -70,7 +70,7 @@ StringCharacter = [^\r\n\"]
     "swap"      {System.out.println("<SWAP>");}
 
     "print"     {System.out.println("<PRINT>");}
-    "?"         {System.out.println("<QUESTION>")}
+    "?"         {System.out.println("<QUESTION>");}
 
     /*
         Boolean Literals
