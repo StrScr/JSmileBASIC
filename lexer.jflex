@@ -45,6 +45,7 @@ Whitespace = [ \t\f]
 BaseIdentifier = [A-Za-z_][A-Za-z_0-9]*
 Comment = ("'"|"rem "){InputChar}*{LineEnd}?
 NumberLiteral = [0-9]+
+DecimalLiteral = {NumberLiteral}"."{NumberLiteral}
 StringCharacter = [^\r\n\"]
 
 %state STRING
@@ -60,10 +61,11 @@ StringCharacter = [^\r\n\"]
     "else"      {return symbol(sym.ELSE);}
     "elseif"    {return symbol(sym.ELSEIF);}
     "endif"     {return symbol(sym.THEN);}
+    "on"        {return symbol(sym.ON);}
 
+    "for"       {return symbol(sym.FOR);}
     "to"        {return symbol(sym.TO);}
     "step"      {return symbol(sym.STEP);}
-    "for"       {return symbol(sym.FOR);}
     "next"      {return symbol(sym.NEXT);}
     "while"     {return symbol(sym.WHILE);}
     "wend"      {return symbol(sym.WEND);}
@@ -75,6 +77,8 @@ StringCharacter = [^\r\n\"]
     "stop"      {return symbol(sym.STOP);}
 
     "def"       {return symbol(sym.DEF);}
+    "common"    {return symbol(sym.COMMON);}
+    "call"      {return symbol(sym.CALL);}
     "return"    {return symbol(sym.RETURN);}
     "out"       {return symbol(sym.OUT);}
     "end"       {return symbol(sym.END);}
@@ -86,6 +90,17 @@ StringCharacter = [^\r\n\"]
     "swap"      {return symbol(sym.SWAP);}
 
     "print"     {return symbol(sym.PRINT);}
+    "?"         {return symbol(sym.QUESTION);}
+
+    "input"     {return symbol(sym.INPUT);}
+    "linput"    {return symbol(sym.LINPUT);}
+
+    "read"      {return symbol(sym.READ);}
+    "data"      {return symbol(sym.DATA);}
+    "restore"   {return symbol(sym.RESTORE);}
+
+    "exec"      {return symbol(sym.EXEC);}
+    "use"       {return symbol(sym.USE);}
 
     /*
         Boolean Literals
@@ -102,6 +117,8 @@ StringCharacter = [^\r\n\"]
     "]"     {return symbol(sym.RBRACK);}
     ","     {return symbol(sym.COMMA);}
     ":"     {return symbol(sym.COLON);}
+    ";"     {return symbol(sym.SEMICOLON);}
+
 
     /*
         Operators
@@ -123,11 +140,22 @@ StringCharacter = [^\r\n\"]
     "-"     {return symbol(sym.MINUS);}
     "*"     {return symbol(sym.MULT);}
     "/"     {return symbol(sym.DIV);}
+    "mod"   {return symbol(sym.MOD);}
+    "div"   {return symbol(sym.INTEGER_DIV);}
+
+    "and"   {return symbol(sym.BIT_AND);}
+    "or"    {return symbol(sym.BIT_OR);}
+    "xor"   {return symbol(sym.BIT_XOR);}
+    "not"   {return symbol(sym.BIT_NOT);}
+
+    "<<"    {return symbol(sym.LSHIFT);}
+    ">>"    {return symbol(sym.RSHIFT);}
 
     /*
         Numeric Literals
     */
     {NumberLiteral}       {return symbol(sym.NUMBER, yytext());}
+    {DecimalLiteral}      {return symbol(sym.DECIMAL, yytext());}
 
     /*
         string literal
@@ -138,8 +166,9 @@ StringCharacter = [^\r\n\"]
         Identifiers
     */
     {BaseIdentifier}"$"   {return symbol(sym.IDENTIFIER_STRING, yytext());}//String
-    {BaseIdentifier}"%"   {return symbol(sym.IDENTIFIER_DECIMAL, yytext());}//Decimal
-    {BaseIdentifier}"#"?  {return symbol(sym.IDENTIFIER_INTEGER, yytext());}//Integer
+    {BaseIdentifier}"#"   {return symbol(sym.IDENTIFIER_DECIMAL, yytext());}//Decimal
+    {BaseIdentifier}"%"?  {return symbol(sym.IDENTIFIER_INTEGER, yytext());}//Integer
+    "@"{BaseIdentifier}   {return symbol(sym.LABEL, yytext());}//Label
 
     /*
         Line End
@@ -154,25 +183,10 @@ StringCharacter = [^\r\n\"]
 }
 
 <STRING> {
-  \"                             { yybegin(YYINITIAL); return symbol(sym.STRING_LITERAL, string.toString()); }
-  
-  {StringCharacter}+             { string.append( yytext() ); }
-  
-  /* escape sequences *
-  "\\b"                          { string.append( '\b' ); }
-  "\\t"                          { string.append( '\t' ); }
-  "\\n"                          { string.append( '\n' ); }
-  "\\f"                          { string.append( '\f' ); }
-  "\\r"                          { string.append( '\r' ); }
-  "\\\""                         { string.append( '\"' ); }
-  "\\'"                          { string.append( '\'' ); }
-  "\\\\"                         { string.append( '\\' ); }
-  
-  /* error cases *
-  \\.                            { throw new RuntimeException("Illegal escape sequence \""+yytext()+"\""); }
-  */
-  {LineEnd}                      { throw new RuntimeException("Unterminated string at end of line "+yyline);}
+    \"                  {yybegin(YYINITIAL); return symbol(sym.STRING_LITERAL, string.toString());}
+    {StringCharacter}+  {string.append(yytext());}
+    {LineEnd}           {throw new RuntimeException("Unterminated string at end of line "+yyline);}
 }
 
 //Anything that doesn't match
-[^]     {throw new Error("LEXIC ERROR: I don't know what this is!: "+yytext());}
+[^]     {throw new Error("LEXIC ERROR on line "+yyline+", column "+yycolumn+": I don't know what this is!: "+yytext());}
