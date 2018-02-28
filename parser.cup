@@ -4,30 +4,29 @@ import java_cup.runtime.*;
 
 parser code
 {:
-	public void syntax_error(Symbol s){
-		report_error("Error de sintaxis. Linea: " + (s.right + 1) +
-		" Columna: " + s.left + ". Texto: \"" + s.value + "\"", null);
-	}
-        public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception 
-        {
-         //report_fatal_error("Fatal Error: " + s.value, null);
-        }
-       
-
+    public void syntax_error(Symbol s){
+        report_error("Error de sintaxis. Linea: " + (s.right + 1) +
+            " Columna: " + s.left + ". Texto: \"" + s.value + "\"", null);
+    }
+    
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
+        report_fatal_error("Fatal Error: " + s.value, null);
+    }
 
 :}
 
-
-/* Terminals Tokens */
+/* Terminals */
 
 terminal IF;
 terminal THEN;
 terminal ELSE;
 terminal ELSEIF;
 terminal ENDIF;
+terminal ON;
+
+terminal FOR;
 terminal TO;
 terminal STEP;
-terminal FOR;
 terminal NEXT;
 terminal WHILE;
 terminal WEND;
@@ -35,25 +34,46 @@ terminal REPEAT;
 terminal UNTIL;
 terminal CONTINUE;
 terminal BREAK;
+
 terminal STOP;
+
 terminal DEF;
+terminal COMMON;
+terminal CALL;
 terminal RETURN;
 terminal OUT;
 terminal END;
+
 terminal VAR;
 terminal DIM;
 terminal INC;
 terminal DEC;
 terminal SWAP;
+
 terminal PRINT;
+terminal QUESTION;
+
+terminal INPUT;
+terminal LINPUT;
+
+terminal READ;
+terminal DATA;
+terminal RESTORE;
+
+terminal EXEC;
+terminal USE;
+
 terminal TRUE;
 terminal FALSE;
+
 terminal LPAREN;
 terminal RPAREN;
 terminal LBRACK;
 terminal RBRACK;
 terminal COMMA;
 terminal COLON;
+terminal SEMICOLON;
+
 terminal EQ;
 terminal EQEQ;
 terminal NOTEQ;
@@ -61,15 +81,39 @@ terminal LT;
 terminal LTEQ;
 terminal GT;
 terminal GTEQ;
+
 terminal NOT;
 terminal ANDAND;
 terminal OROR;
+
+terminal PLUS;
+terminal MINUS;
+terminal MULT;
+terminal DIV;
+terminal MOD;
+terminal INTEGER_DIV;
+
+terminal BIT_AND;
+terminal BIT_OR;
+terminal BIT_XOR;
+terminal BIT_NOT;
+
+terminal LSHIFT;
+terminal RSHIFT;
+
 terminal NUMBER;
+terminal DECIMAL;
+
+terminal STRING_LITERAL;
+
 terminal IDENTIFIER_STRING;
 terminal IDENTIFIER_DECIMAL;
 terminal IDENTIFIER_INTEGER;
+terminal LABEL;
+
 terminal LINEEND;
 
+/* Non Terminals */
 
 non terminal empty;
 
