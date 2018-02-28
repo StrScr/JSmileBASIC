@@ -40,7 +40,7 @@ StringCharacter = [^\r\n\"]
     "then"      {System.out.println("<THEN>");}
     "else"      {System.out.println("<ELSE>");}
     "elseif"    {System.out.println("<ELSEIF>");}
-    "endif"     {System.out.println("<THEN>");}
+    "endif"     {System.out.println("<ENDIF>");}
     "on"        {System.out.println("<ON>");}
 
     "for"       {System.out.println("<FOR>");}

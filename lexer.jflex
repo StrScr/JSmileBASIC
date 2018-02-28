@@ -60,7 +60,7 @@ StringCharacter = [^\r\n\"]
     "then"      {return symbol(sym.THEN);}
     "else"      {return symbol(sym.ELSE);}
     "elseif"    {return symbol(sym.ELSEIF);}
-    "endif"     {return symbol(sym.THEN);}
+    "endif"     {return symbol(sym.ENDIF);}
     "on"        {return symbol(sym.ON);}
 
     "for"       {return symbol(sym.FOR);}
