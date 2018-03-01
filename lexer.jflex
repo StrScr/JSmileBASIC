@@ -44,6 +44,7 @@ InputChar = [^\r\n]
 Whitespace = [ \t\f]
 BaseIdentifier = [A-Za-z_][A-Za-z_0-9]*
 Comment = ("rem"|("'"|"rem "){InputChar}*){LineEnd}?
+MultiLineComment = "#".*"/#"
 NumberLiteral = [0-9]+
 DecimalLiteral = {NumberLiteral}"."{NumberLiteral}
 StringCharacter = [^\r\n\"]
