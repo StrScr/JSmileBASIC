@@ -23,6 +23,9 @@ terminal ELSE;
 terminal ELSEIF;
 terminal ENDIF;
 terminal ON;
+terminal CASE;
+terminal DEFAULT;
+terminal WON;
 
 terminal FOR;
 terminal TO;

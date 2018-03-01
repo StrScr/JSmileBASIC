@@ -63,6 +63,9 @@ StringCharacter = [^\r\n\"]
     "elseif"    {return symbol(sym.ELSEIF);}
     "endif"     {return symbol(sym.ENDIF);}
     "on"        {return symbol(sym.ON);}
+    "case"      {return symbol(sym.CASE);}
+    "default"   {return symbol(sym.DEFAULT);}
+    "won"       {return symbol(sym.WON);}
 
     "for"       {return symbol(sym.FOR);}
     "to"        {return symbol(sym.TO);}
