@@ -179,8 +179,9 @@ StringCharacter = [^\r\n\"]
     /*
         Ignored
     */
-    {Whitespace}    {}
-    {Comment}       {}
+    {Whitespace}        {}
+    {Comment}           {}
+    {MultiLineComment}  {}
 }
 
 <STRING> {
