@@ -1,4 +1,10 @@
-package jsmilebasic;
+/*
+    SmileBASIC Syntax Analyzer by StrScr
+    To be used with CUP.
+*/
+
+package JSmileBASIC;
+
 import java.io.*;
 import java_cup.runtime.*;
 
@@ -17,107 +23,107 @@ parser code
 
 /* Terminals */
 
-terminal IF;
-terminal THEN;
-terminal ELSE;
-terminal ELSEIF;
-terminal ENDIF;
-terminal ON;
-terminal CASE;
-terminal DEFAULT;
-terminal WON;
+terminal IF, THEN, ELSE, ELSEIF, ENDIF;
+terminal ON, CASE, DEFAULT, WON;
 
-terminal FOR;
-terminal TO;
-terminal STEP;
-terminal NEXT;
-terminal WHILE;
-terminal WEND;
-terminal REPEAT;
-terminal UNTIL;
-terminal CONTINUE;
-terminal BREAK;
+terminal FOR, TO, STEP, NEXT;
+terminal WHILE, WEND;
+terminal REPEAT, UNTIL;
+terminal CONTINUE, BREAK;
 
 terminal STOP;
 
-terminal DEF;
-terminal COMMON;
-terminal CALL;
-terminal RETURN;
-terminal OUT;
-terminal END;
+terminal DEF, COMMON, CALL, RETURN, OUT, END;
 
-terminal VAR;
-terminal DIM;
-terminal INC;
-terminal DEC;
-terminal SWAP;
+terminal VAR, DIM;
+terminal INC, DEC, SWAP;
 
-terminal PRINT;
-terminal QUESTION;
+terminal PRINT, QUESTION;
 
-terminal INPUT;
-terminal LINPUT;
+terminal INPUT, LINPUT;
 
-terminal READ;
-terminal DATA;
-terminal RESTORE;
+terminal READ, DATA, RESTORE;
 
-terminal EXEC;
-terminal USE;
+terminal EXEC, USE;
 
-terminal TRUE;
-terminal FALSE;
+terminal TRUE, FALSE;
 
-terminal LPAREN;
-terminal RPAREN;
-terminal LBRACK;
-terminal RBRACK;
-terminal COMMA;
-terminal COLON;
-terminal SEMICOLON;
+terminal LPAREN, RPAREN;
+terminal LBRACK,RBRACK;
+terminal COMMA, SEMICOLON;
 
 terminal EQ;
-terminal EQEQ;
-terminal NOTEQ;
-terminal LT;
-terminal LTEQ;
-terminal GT;
-terminal GTEQ;
+terminal EQEQ, NOTEQ, LT, LTEQ, GT, GTEQ;
 
-terminal NOT;
-terminal ANDAND;
-terminal OROR;
+terminal NOT, ANDAND, OROR;
 
-terminal PLUS;
-terminal MINUS;
-terminal MULT;
-terminal DIV;
-terminal MOD;
-terminal INTEGER_DIV;
+terminal PLUS, MINUS;
+terminal MULT, DIV, MOD, INTEGER_DIV;
 
-terminal BIT_AND;
-terminal BIT_OR;
-terminal BIT_XOR;
-terminal BIT_NOT;
+terminal BIT_AND, BIT_OR, BIT_XOR, BIT_NOT;
 
-terminal LSHIFT;
-terminal RSHIFT;
+terminal LSHIFT, RSHIFT;
 
-terminal NUMBER;
-terminal DECIMAL;
-
+terminal NUMBER, DECIMAL;
 terminal STRING_LITERAL;
 
-terminal IDENTIFIER_STRING;
-terminal IDENTIFIER_DECIMAL;
-terminal IDENTIFIER_INTEGER;
+terminal IDENTIFIER_STRING, IDENTIFIER_DECIMAL, IDENTIFIER_INTEGER;
 terminal LABEL;
 
-terminal LINEEND;
+terminal LINEEND, COLON;
+
+// Used for different precedence level
+terminal UMINUS;
 
 /* Non Terminals */
+/*  Shortening Map
+    stmnt -> Statement
+    expr -> Expression
+    op -> Operator
+    bin -> Binary
+    sep -> Separator
+*/
 
-non terminal empty;
+non terminal stmnt_list, stmnt;
+non terminal expr, literal, id;
+non terminal math_op_mult, math_op_sum;
+non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
+non terminal sep;
+//Statements
+non terminal declaration, asig;
+non terminal conditional, loop;
+non terminal if_stmnt, on_stmnt;
+non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop;
 
-empty ::= /* nothing */;
+/* Precedence */
+
+//TODO
+
+/* Grammar */
+
+start with stmnt_list;
+
+stmt_list   ::= stmnt
+            |   stmnt stmnt_sep stmnt_list
+            ;
+stmnt       ::= asig | conditional | loop | 
+sep         ::= LINEEND | COLON;
+literal     ::= NUMBER | DECIMAL | STRING_LITERAL | TRUE | FALSE;
+id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
+
+//Statements
+declaration ::= VAR id | DIM id
+            |   VAR asig | DIM asig
+            ;
+asig        ::= id EQ expr
+            |   id LBRACK expr RBRACK EQ expr
+            ;
+
+//Expression Terminal Groups
+unary_op        ::= MINUS %prec UMINUS | NOT | BIT_NOT;
+math_op_mult    ::= MULT | DIV | MOD | INTEGER_DIV;
+math_op_sum     ::= PLUS | MINUS;
+bit_shift       ::= LSHIFT | RSHIFT;
+bin_relation_op ::= EQEQ | NOTEQ | LT | LTEQ | GT | GTEQ;
+bin_bit_op      ::= BIT_AND | BIT_OR | BIT_XOR;
+bin_logic_op    ::= ANDAND | OROR;
