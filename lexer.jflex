@@ -80,6 +80,9 @@ StringCharacter = [^\r\n\"]
 
     "stop"      {return symbol(sym.STOP);}
 
+    "goto"      {return symbol(sym.GOTO);}
+    "gosub"      {return symbol(sym.GOSUB);}
+
     "def"       {return symbol(sym.DEF);}
     "common"    {return symbol(sym.COMMON);}
     "call"      {return symbol(sym.CALL);}

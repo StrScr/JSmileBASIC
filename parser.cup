@@ -33,6 +33,8 @@ terminal CONTINUE, BREAK;
 
 terminal STOP;
 
+terminal GOTO, GOUB;
+
 terminal DEF, COMMON, CALL, RETURN, OUT, END;
 
 terminal VAR, DIM;
@@ -106,7 +108,7 @@ start with stmnt_list;
 stmt_list   ::= stmnt
             |   stmnt stmnt_sep stmnt_list
             ;
-stmnt       ::= asig | conditional | loop | 
+stmnt       ::= declaration | asig | conditional | loop | ;//TODO
 sep         ::= LINEEND | COLON;
 literal     ::= NUMBER | DECIMAL | STRING_LITERAL | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
