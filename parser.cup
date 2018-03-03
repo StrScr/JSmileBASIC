@@ -33,7 +33,7 @@ terminal CONTINUE, BREAK;
 
 terminal STOP;
 
-terminal GOTO, GOUB;
+terminal GOTO, GOSUB;
 
 terminal DEF, COMMON, CALL, RETURN, OUT, END;
 
@@ -74,7 +74,7 @@ terminal LABEL;
 
 terminal LINEEND, COLON;
 
-// Used for different precedence level
+// Used for precedence only
 terminal UMINUS;
 
 /* Non Terminals */
@@ -94,8 +94,13 @@ non terminal sep;
 //Statements
 non terminal declaration, asig;
 non terminal conditional, loop;
-non terminal if_stmnt, on_stmnt;
-non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop;
+non terminal if_stmnt, if_2, on_stmnt;
+non terminal goto_stmnt;
+non terminal def_stmnt, call_stmnt;
+non terminal increment_stmnt, swap_stmnt;
+non terminal print_stmnt;
+non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
+//TODO: read, data, restore, exec, use
 
 /* Precedence */
 
@@ -106,9 +111,12 @@ non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop;
 start with stmnt_list;
 
 stmt_list   ::= stmnt
-            |   stmnt stmnt_sep stmnt_list
+            |   stmnt sep stmnt_list
             ;
-stmnt       ::= declaration | asig | conditional | loop | ;//TODO
+stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
+            | swap_stmnt | print_stmnt | call_stmnt | sep
+            | LABEL | STOP | END
+            ;//TODO
 sep         ::= LINEEND | COLON;
 literal     ::= NUMBER | DECIMAL | STRING_LITERAL | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
@@ -120,6 +128,17 @@ declaration ::= VAR id | DIM id
 asig        ::= id EQ expr
             |   id LBRACK expr RBRACK EQ expr
             ;
+
+conditional ::= if_stmnt | on_stmnt;
+if_stmnt    ::= IF expr THEN stmnt_list sep if_2 sep ENDIF;
+if_2        ::= ELSEIF expr THEN stmnt_list sep if_2
+            |   ELSE stmnt_list
+            |;
+
+loop        ::= for_stmnt | while_stmnt | repeat_stmnt;
+stmnt_loop_list ::= stmnt_loop
+                |   stmnt_loop sep stmnt_loop_list;
+stmnt_loop  ::= stmnt | BREAK | CONTINUE;
 
 //Expression Terminal Groups
 unary_op        ::= MINUS %prec UMINUS | NOT | BIT_NOT;
