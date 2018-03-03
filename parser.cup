@@ -119,5 +119,65 @@ terminal LINEEND;
 /* Non Terminals */
 
 non terminal empty;
+non terminal CONTENIDO, Comp, S1;
 
 empty ::= /* nothing */;
+
+Comp ::= EQ
+        |EQEQ
+        |NOTEQ
+        |LT
+        |LTEQ
+        |GT
+        |GTEQ
+        ;
+
+CONTENIDO ::= CONTENIDO IF
+            | CONTENIDO THEN
+            | CONTENIDO ELSE
+            | CONTENIDO ELSEIF
+            | CONTENIDO ENDIF
+            | CONTENIDO ON
+            | CONTENIDO CASE
+            | CONTENIDO DEFAULT
+            | CONTENIDO WON
+            | CONTENIDO FOR
+            | CONTENIDO TO
+            | CONTENIDO STEP
+            | CONTENIDO NEXT
+            | CONTENIDO WHILE
+            | CONTENIDO WEND
+            | CONTENIDO REPEAT
+            | CONTENIDO UNTIL
+            | CONTENIDO CONTINUE
+            | CONTENIDO BREAK
+            | CONTENIDO STOP
+            | CONTENIDO DEF
+            | CONTENIDO COMMON
+            | CONTENIDO CALL
+            | CONTENIDO RETURN
+            | CONTENIDO OUT
+            | CONTENIDO END
+            | CONTENIDO VAR
+            | CONTENIDO DIM
+            | CONTENIDO INC
+            | CONTENIDO DEC
+            | CONTENIDO SWAP
+            | CONTENIDO PRINT
+            | CONTENIDO QUESTION
+            | CONTENIDO INPUT
+            | CONTENIDO LINPUT
+            | CONTENIDO READ
+            | CONTENIDO DATA
+            | CONTENIDO RESTORE
+            | CONTENIDO EXEC
+            | CONTENIDO USE
+            | CONTENIDO TRUE
+            | CONTENIDO FALSE
+            ;
+
+/*IF*/
+S1 ::=  IF LPAREN IDENTIFIER_INTEGER Comp IDENTIFIER_INTEGER RPAREN 
+      | IF LPAREN IDENTIFIER_INTEGER Comp IDENTIFIER_INTEGER ANDAND IDENTIFIER_INTEGER Comp IDENTIFIER_INTEGER RPAREN  
+      | IF LPAREN IDENTIFIER_INTEGER Comp IDENTIFIER_INTEGER OROR IDENTIFIER_INTEGER Comp IDENTIFIER_INTEGER RPAREN  
+      ; 
