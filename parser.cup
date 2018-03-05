@@ -130,12 +130,15 @@ asig        ::= id EQ expr
             ;
 
 conditional ::= if_stmnt | on_stmnt;
-if_stmnt    ::= IF expr THEN stmnt_list sep if_2 sep ENDIF;
-if_2        ::= ELSEIF expr THEN stmnt_list sep if_2
-            |   ELSE stmnt_list
+if_stmnt    ::= IF expr THEN stmnt_list if_2 sep ENDIF;
+if_2        ::= sep ELSEIF expr THEN stmnt_list sep if_2
+            |   sep ELSE stmnt_list
             |;
 
 loop        ::= for_stmnt | while_stmnt | repeat_stmnt;
+for_stmnt   ::=;
+while_stmnt ::=;
+repeat_stmnt::=;
 stmnt_loop_list ::= stmnt_loop
                 |   stmnt_loop sep stmnt_loop_list;
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
