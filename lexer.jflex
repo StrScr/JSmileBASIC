@@ -81,7 +81,7 @@ StringCharacter = [^\r\n\"]
     "stop"      {return symbol(sym.STOP);}
 
     "goto"      {return symbol(sym.GOTO);}
-    "gosub"      {return symbol(sym.GOSUB);}
+    "gosub"     {return symbol(sym.GOSUB);}
 
     "def"       {return symbol(sym.DEF);}
     "common"    {return symbol(sym.COMMON);}
@@ -191,10 +191,10 @@ StringCharacter = [^\r\n\"]
 }
 
 <STRING> {
-    \"                  {yybegin(YYINITIAL); return symbol(sym.STRING_LITERAL, string.toString());}
+    \"                  {yybegin(YYINITIAL); return symbol(sym.STRING, string.toString());}
     {StringCharacter}+  {string.append(yytext());}
-    {LineEnd}           {throw new RuntimeException("Unterminated string at end of line "+yyline);}
+    {LineEnd}           {throw new RuntimeException("Unterminated string at end of line "+(yyline+1));}
 }
 
 //Anything that doesn't match
-[^]     {throw new Error("LEXIC ERROR on line "+yyline+", column "+yycolumn+": I don't know what this is!: "+yytext());}
+[^]     {throw new Error("Lexic error on line "+(yyline+1)+", column "+(yycolumn+1)+": I don't know what this is!: "+yytext());}

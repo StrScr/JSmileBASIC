@@ -51,7 +51,7 @@ terminal EXEC, USE;
 terminal TRUE, FALSE;
 
 terminal LPAREN, RPAREN;
-terminal LBRACK,RBRACK;
+terminal LBRACK, RBRACK;
 terminal COMMA, SEMICOLON;
 
 terminal EQ;
@@ -67,7 +67,7 @@ terminal BIT_AND, BIT_OR, BIT_XOR, BIT_NOT;
 terminal LSHIFT, RSHIFT;
 
 terminal NUMBER, DECIMAL;
-terminal STRING_LITERAL;
+terminal STRING;
 
 terminal IDENTIFIER_STRING, IDENTIFIER_DECIMAL, IDENTIFIER_INTEGER;
 terminal LABEL;
@@ -118,13 +118,13 @@ stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt
             | LABEL | STOP | END
             ;//TODO
 sep         ::= LINEEND | COLON;
-literal     ::= NUMBER | DECIMAL | STRING_LITERAL | TRUE | FALSE;
+literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
 
 //Statements
 declaration ::= VAR id | DIM id
             |   VAR asig | DIM asig
-            ;
+            ;//include arrays
 asig        ::= id EQ expr
             |   id LBRACK expr RBRACK EQ expr
             ;
