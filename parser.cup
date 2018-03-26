@@ -14,7 +14,7 @@ parser code
         report_error("Error de sintaxis. Linea: " + (s.right + 1) +
             " Columna: " + s.left + ". Texto: \"" + s.value + "\"", null);
     }
-    
+
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
         report_fatal_error("Fatal Error: " + s.value, null);
     }
@@ -100,6 +100,9 @@ non terminal def_stmnt, call_stmnt;
 non terminal increment_stmnt, swap_stmnt;
 non terminal print_stmnt;
 non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
+non terminal statement_inside_while;
+non terminal bool_exp, relational_expression, logical_expression, relational_expression;
+non terminal relational_operators, logical_operators, logical_operators;
 //TODO: read, data, restore, exec, use
 
 /* Precedence */
@@ -110,7 +113,7 @@ non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
 
 start with stmnt_list;
 
-stmt_list   ::= stmnt
+stmnt_list   ::= stmnt
             |   stmnt sep stmnt_list
             ;
 stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
@@ -120,6 +123,32 @@ stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt
 sep         ::= LINEEND | COLON;
 literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
+
+bool_exp ::= relational_expression:rl logical_expression:le;
+
+relational_expression   ::=  expr:e1 relational_operators:r expr:e2
+							           | LPAREN relational_expression:rl RPAREN
+							           | error {: parser.report_error("relational_expression","ERROR"); :} LT expr
+
+                         | error {: parser.report_error("relational_expression","ERROR"); :} GT expr
+
+                         | error  {: parser.report_error("relational_expression","ERROR"); :} LTEQ expr
+
+                         | error {: parser.report_error("relational_expression" ,"ERROR"); :} GTEQ expr ;
+
+relational_operators ::=  LTEQ
+					| LT
+					| GT
+					| GTEQ
+					| EQEQ
+					| NOTEQ;
+
+logical_expression ::= logical_operators:lo bool_exp:bo
+					|	;
+
+logical_operators ::= ANDAND
+					| OROR
+					;
 
 //Statements
 declaration ::= VAR id | DIM id
@@ -136,9 +165,17 @@ if_2        ::= sep ELSEIF expr THEN stmnt_list sep if_2
             |;
 
 loop        ::= for_stmnt | while_stmnt | repeat_stmnt;
-for_stmnt   ::=;
-while_stmnt ::=;
-repeat_stmnt::=;
+
+for_stmnt   ::=; FOR expr_for STEP INT sep stmnt_list sep NEXT;
+
+expr_for  ::= sep ID EQ INT sep ;
+
+while_stmnt ::= WHILE bool_exp:b statement_inside_while:s WEND
+
+statement_inside_while ::= sep stmnt_list:sl sep ;
+
+repeat_stmnt::= REPEAT statement_inside_while UNTIL bool_exp;
+
 stmnt_loop_list ::= stmnt_loop
                 |   stmnt_loop sep stmnt_loop_list;
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
