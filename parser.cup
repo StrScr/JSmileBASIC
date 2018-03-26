@@ -99,7 +99,7 @@ non terminal goto_stmnt;
 non terminal def_stmnt, call_stmnt;
 non terminal increment_stmnt, swap_stmnt;
 non terminal print_stmnt;
-non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
+non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop, expr_for ;
 non terminal statement_inside_while;
 non terminal bool_exp, relational_expression, logical_expression, relational_expression;
 non terminal relational_operators, logical_operators, logical_operators;
