@@ -92,7 +92,7 @@ non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt;
 non terminal goto_stmnt;
-non terminal def_stmnt, call_stmnt;
+non terminal def_stmnt, call_stmnt, def_params, def_param_list;
 non terminal increment_stmnt, swap_stmnt;
 non terminal print_stmnt, print_list;
 non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
@@ -153,9 +153,17 @@ stmnt_loop_list ::= stmnt_loop
                 |   stmnt_loop sep stmnt_loop_list;
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
 
-goto_stmnt  ::=;
+goto_stmnt  ::= GOTO LABEL | GOSUB LABEL;
 
-def_stmnt   ::=;
+
+def_stmnt   ::= DEF ID def_params sep stmnt_list sep END;
+
+def_params  ::= LPAREN def_param_list RPAREN
+		| ;
+
+def_param_list ::= ID COMA def_param_list
+    			       | ID
+                 ;
 
 increment_stmnt ::= INC id
                 |   INC id COMMA expr
