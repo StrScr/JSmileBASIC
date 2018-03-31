@@ -104,7 +104,7 @@ non terminal math_op_mult, math_op_sum;
 non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
 
 /* Precedence */
-precedence left ANDAND,a OROR;
+precedence left ANDAND, OROR;
 precedence left BIT_AND, BIT_OR, BIT_XOR;
 precedence left EQEQ, NOTEQ, LT, LTEQ, GT, GTEQ;
 precedence left LSHIFT, RSHIFT;
