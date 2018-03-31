@@ -105,8 +105,13 @@ non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
 non terminal bool_exp;
 
 /* Precedence */
-
-//TODO
+precedence left bin_logic_op;
+precedence left bin_bit_op;
+precedence left bin_relation_op;
+precedence left bit_shift;
+precedence left math_op_sum;
+precedence left math_op_mult;
+precedence left unary_op;
 
 /* Grammar */
 
@@ -147,7 +152,7 @@ stmnt_loop_list ::= stmnt_loop
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
 
 //Expressions
-expr        ::=;
+expr        ::= ;
 literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
 numeric     ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | NUMBER | DECIMAL | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
