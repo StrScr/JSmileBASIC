@@ -102,7 +102,6 @@ non terminal sep;
 non terminal expr, literal, numeric, id;
 non terminal math_op_mult, math_op_sum;
 non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
-non terminal bool_exp;
 
 /* Precedence */
 precedence left bin_logic_op;
@@ -152,11 +151,17 @@ stmnt_loop_list ::= stmnt_loop
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
 
 //Expressions
-expr        ::= ;
-literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
-numeric     ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | NUMBER | DECIMAL | TRUE | FALSE;
-id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
-bool_exp    ::= expr bin_relation_op expr;
+expr        ::= expr bin_logic_op expr
+            |   expr bin_bit_op expr
+            |   expr bin_logic_op expr
+            |   expr bit_shift expr
+            |   expr math_op_sum expr
+            |   expr math_op_mult expr
+            |   unary_op expr
+            |   LPAREN expr RPAREN
+            |   literal
+            |   id
+            ;
 
 //Expression Terminal Groups
 unary_op        ::= MINUS %prec UMINUS | NOT | BIT_NOT;
@@ -166,3 +171,6 @@ bit_shift       ::= LSHIFT | RSHIFT;
 bin_relation_op ::= EQEQ | NOTEQ | LT | LTEQ | GT | GTEQ;
 bin_bit_op      ::= BIT_AND | BIT_OR | BIT_XOR;
 bin_logic_op    ::= ANDAND | OROR;
+literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
+numeric     ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | NUMBER | DECIMAL | TRUE | FALSE;
+id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
