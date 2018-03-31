@@ -94,7 +94,7 @@ non terminal if_stmnt, if_2, on_stmnt;
 non terminal goto_stmnt;
 non terminal def_stmnt, call_stmnt;
 non terminal increment_stmnt, swap_stmnt;
-non terminal print_stmnt;
+non terminal print_stmnt, print_list;
 non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
 non terminal sep;
 //TODO: read, data, restore, exec, use
@@ -166,7 +166,14 @@ increment_stmnt ::= INC id
 swap_stmnt  ::= SWAP id COMMA id
             ;
 
-print_stmnt ::=;
+print_stmnt ::= PRINT print_list
+            |   QUESTION print_list
+            ;
+print_list  ::= expr COMMA print_list
+            |   expr SEMICOLON print_list
+            |   expr
+            |   empty
+            ;
 
 call_stmnt  ::=;
 
