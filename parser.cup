@@ -134,11 +134,14 @@ asig        ::= id EQ expr
             ;
 
 conditional ::= if_stmnt | on_stmnt;
-if_stmnt    ::= IF expr THEN stmnt_list if_2 sep ENDIF;
+if_stmnt    ::= IF expr THEN stmnt_list if_2 sep ENDIF
+            ;
 if_2        ::= sep ELSEIF expr THEN stmnt_list sep if_2
             |   sep ELSE stmnt_list
             |   empty
             ;
+on_stmnt    ::= ON expr
+            ;//TODO
 
 loop        ::= for_stmnt | while_stmnt | repeat_stmnt;
 for_stmnt   ::= FOR ID EQ NUMBER TO NUMBER sep stmnt_list sep NEXT
@@ -149,6 +152,23 @@ repeat_stmnt::= REPEAT sep stmnt_loop_list sep UNTIL expr;
 stmnt_loop_list ::= stmnt_loop
                 |   stmnt_loop sep stmnt_loop_list;
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
+
+goto_stmnt  ::=;
+
+def_stmnt   ::=;
+
+increment_stmnt ::= INC id
+                |   INC id COMMA expr
+                |   DEC id
+                |   DEC id COMMA expr
+                ;
+
+swap_stmnt  ::= SWAP id COMMA id
+            ;
+
+print_stmnt ::=;
+
+call_stmnt  ::=;
 
 //Expressions
 expr    ::= expr bin_logic_op expr
