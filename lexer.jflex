@@ -27,7 +27,7 @@ import java_cup.runtime.*;
         //System.out.print("<"+type+":"+yytext()+">");
         return new Symbol(type, yyline, yycolumn);
     }
-    
+
     /* Also creates a new java_cup.runtime.Symbol with information
        about the current token, but this object has a value. */
     private Symbol symbol(int type, Object value) {
@@ -84,7 +84,7 @@ StringCharacter = [^\r\n\"]
     "gosub"     {return symbol(sym.GOSUB);}
 
     "def"       {return symbol(sym.DEF);}
-    "common"    {return symbol(sym.COMMON);}
+    //"common"    {return symbol(sym.COMMON);}
     "call"      {return symbol(sym.CALL);}
     "return"    {return symbol(sym.RETURN);}
     "out"       {return symbol(sym.OUT);}
@@ -102,12 +102,12 @@ StringCharacter = [^\r\n\"]
     "input"     {return symbol(sym.INPUT);}
     "linput"    {return symbol(sym.LINPUT);}
 
-    "read"      {return symbol(sym.READ);}
-    "data"      {return symbol(sym.DATA);}
-    "restore"   {return symbol(sym.RESTORE);}
+    //"read"      {return symbol(sym.READ);}
+    //"data"      {return symbol(sym.DATA);}
+    //"restore"   {return symbol(sym.RESTORE);}
 
-    "exec"      {return symbol(sym.EXEC);}
-    "use"       {return symbol(sym.USE);}
+    //"exec"      {return symbol(sym.EXEC);}
+    //"use"       {return symbol(sym.USE);}
 
     /*
         Boolean Literals

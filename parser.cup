@@ -31,11 +31,12 @@ terminal WHILE, WEND;
 terminal REPEAT, UNTIL;
 terminal CONTINUE, BREAK;
 
-terminal STOP;
+//terminal STOP;
 
 terminal GOTO, GOSUB;
 
-terminal DEF, COMMON, CALL, RETURN, OUT, END;
+terminal DEF, CALL, RETURN, OUT, END;
+//terminal COMMON;
 
 terminal VAR, DIM;
 terminal INC, DEC, SWAP;
@@ -44,9 +45,9 @@ terminal PRINT, QUESTION;
 
 terminal INPUT, LINPUT;
 
-terminal READ, DATA, RESTORE;
+//terminal READ, DATA, RESTORE;
 
-terminal EXEC, USE;
+//terminal EXEC, USE;
 
 terminal TRUE, FALSE;
 
@@ -92,9 +93,10 @@ non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt;
 non terminal goto_stmnt;
-non terminal def_stmnt, call_stmnt, def_params, def_param_list;
+non terminal def_stmnt, call_stmnt, def_params, def_param_list, call_argmts, call_variables;
 non terminal increment_stmnt, swap_stmnt;
 non terminal print_stmnt, print_list;
+non terminal input_stmnt;
 non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
 non terminal sep;
 //TODO: read, data, restore, exec, use
@@ -120,8 +122,8 @@ stmnt_list   ::= stmnt
             |   stmnt sep stmnt_list
             ;
 stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
-            | swap_stmnt | print_stmnt | call_stmnt | sep
-            | LABEL | STOP | END
+            | swap_stmnt | print_stmnt | input_stmnt | call_stmnt | sep
+            | LABEL | STOP | END | RETURN
             ;//TODO
 sep         ::= LINEEND | COLON;
 
@@ -183,7 +185,23 @@ print_list  ::= expr COMMA print_list
             |   empty
             ;
 
-call_stmnt  ::=;
+call_stmnt  ::= CALL STRING call_argmts OUT call_variables
+            | ID EQ CALL LPAREN STRING call_argmts RPAREN ;
+
+call_argmts ::= COMA ID call_argmts
+            | COMA ID
+            |
+            ;
+call_variables ::= ID COMA call_variables
+              |ID
+              ;
+
+
+input_stmnt ::= INPUT STRING SEMICOLON var_list
+            |   INPUT STRING COMMA var_list
+            |   INPUT var_list
+            |   LINPUT STRING SEMICOLON IDENTIFIER_STRING
+            ;
 
 //Expressions
 expr    ::= expr bin_logic_op expr
