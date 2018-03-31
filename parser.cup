@@ -151,17 +151,17 @@ stmnt_loop_list ::= stmnt_loop
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
 
 //Expressions
-expr        ::= expr bin_logic_op expr
-            |   expr bin_bit_op expr
-            |   expr bin_logic_op expr
-            |   expr bit_shift expr
-            |   expr math_op_sum expr
-            |   expr math_op_mult expr
-            |   unary_op expr
-            |   LPAREN expr RPAREN
-            |   literal
-            |   id
-            ;
+expr    ::= expr bin_logic_op expr
+        |   expr bin_bit_op expr
+        |   expr bin_logic_op expr
+        |   expr bit_shift expr
+        |   expr math_op_sum expr
+        |   expr math_op_mult expr
+        |   unary_op expr
+        |   LPAREN expr RPAREN
+        |   literal
+        |   id
+        ;
 
 //Expression Terminal Groups
 unary_op        ::= MINUS %prec UMINUS | NOT | BIT_NOT;
