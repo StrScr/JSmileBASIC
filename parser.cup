@@ -86,12 +86,8 @@ terminal UMINUS;
     sep -> Separator
 */
 
-non terminal stmnt_list, stmnt;
-non terminal expr, literal, id;
-non terminal math_op_mult, math_op_sum;
-non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
-non terminal sep;
 //Statements
+non terminal stmnt_list, stmnt;
 non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt;
@@ -99,9 +95,14 @@ non terminal goto_stmnt;
 non terminal def_stmnt, call_stmnt;
 non terminal increment_stmnt, swap_stmnt;
 non terminal print_stmnt;
-non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop, expr_for;
-non terminal bool_exp;
+non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
+non terminal sep;
 //TODO: read, data, restore, exec, use
+//Expressions
+non terminal expr, literal, numeric, id;
+non terminal math_op_mult, math_op_sum;
+non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
+non terminal bool_exp;
 
 /* Precedence */
 
@@ -119,9 +120,6 @@ stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt
             | LABEL | STOP | END
             ;//TODO
 sep         ::= LINEEND | COLON;
-literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
-id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
-
 
 //Statements
 declaration ::= VAR id | DIM id
@@ -135,19 +133,25 @@ conditional ::= if_stmnt | on_stmnt;
 if_stmnt    ::= IF expr THEN stmnt_list if_2 sep ENDIF;
 if_2        ::= sep ELSEIF expr THEN stmnt_list sep if_2
             |   sep ELSE stmnt_list
-            |;
+            |   empty
+            ;
 
 loop        ::= for_stmnt | while_stmnt | repeat_stmnt;
-
-for_stmnt   ::=; FOR expr_for STEP INT sep stmnt_list sep NEXT;
-
-while_stmnt ::= WHILE bool_exp stmnt_loop_list WEND;
-
-repeat_stmnt::= REPEAT stmnt_loop_list UNTIL bool_exp;
-
+for_stmnt   ::= FOR ID EQ NUMBER TO NUMBER sep stmnt_list sep NEXT
+            |   FOR ID EQ NUMBER TO NUMBER STEP NUMBER sep stmnt_list sep NEXT
+            ;
+while_stmnt ::= WHILE expr sep stmnt_loop_list sep WEND;
+repeat_stmnt::= REPEAT sep stmnt_loop_list sep UNTIL expr;
 stmnt_loop_list ::= stmnt_loop
                 |   stmnt_loop sep stmnt_loop_list;
 stmnt_loop  ::= stmnt | BREAK | CONTINUE;
+
+//Expressions
+expr        ::=;
+literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
+numeric     ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | NUMBER | DECIMAL | TRUE | FALSE;
+id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
+bool_exp    ::= expr bin_relation_op expr;
 
 //Expression Terminal Groups
 unary_op        ::= MINUS %prec UMINUS | NOT | BIT_NOT;
@@ -157,5 +161,3 @@ bit_shift       ::= LSHIFT | RSHIFT;
 bin_relation_op ::= EQEQ | NOTEQ | LT | LTEQ | GT | GTEQ;
 bin_bit_op      ::= BIT_AND | BIT_OR | BIT_XOR;
 bin_logic_op    ::= ANDAND | OROR;
-expr_for        ::= sep ID EQ INT sep ;
-bool_exp        ::=  expr bin_relation_op expr;
