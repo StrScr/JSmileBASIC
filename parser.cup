@@ -1,6 +1,10 @@
 /*
     SmileBASIC Syntax Analyzer by StrScr
     To be used with CUP.
+
+    TODO:
+        Check other TODOs throughout code
+        Allow for multidimensional arrays (Currently one-dimensional)
 */
 
 package JSmileBASIC;
@@ -138,8 +142,8 @@ sep         ::= LINEEND
 //Statements
 declaration ::= VAR id
             |   DIM id
-            |   VAR id LBRACK expr_list RBRACK
-            |   DIM id LBRACK expr_list RBRACK
+            |   VAR id LBRACK expr RBRACK
+            |   DIM id LBRACK expr RBRACK
             |   VAR asig
             |   DIM asig
             ;//TODO: multiple declarations in one line, check if array/var/asig mix is possible  
@@ -252,7 +256,7 @@ expr    ::= expr bin_logic_op expr
         |   LPAREN expr RPAREN
         |   literal
         |   id
-        |   id LBRACK expr_list RBRACK
+        |   id LBRACK expr RBRACK
         |   simp_func_call
         ;
 
