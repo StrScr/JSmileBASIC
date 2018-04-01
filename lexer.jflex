@@ -78,7 +78,7 @@ StringCharacter = [^\r\n\"]
     "continue"  {return symbol(sym.CONTINUE);}
     "break"     {return symbol(sym.BREAK);}
 
-    "stop"      {return symbol(sym.STOP);}
+    //"stop"      {return symbol(sym.STOP);}
 
     "goto"      {return symbol(sym.GOTO);}
     "gosub"     {return symbol(sym.GOSUB);}

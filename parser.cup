@@ -94,7 +94,8 @@ non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt;
 non terminal goto_stmnt;
-non terminal def_stmnt, call_stmnt, var_list;
+non terminal def_stmnt, var_list;
+non terminal call_stmnt, expr_list;
 non terminal def_params, call_argmts;
 non terminal func_call;
 non terminal simp_func_call, multi_func_call, method_call;
@@ -103,7 +104,7 @@ non terminal print_stmnt, print_list;
 non terminal input_stmnt;
 non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
 non terminal sep;
-//TODO: read, data, restore, exec, use
+//LATER TODO: read, data, restore, exec, use
 //Expressions
 non terminal expr, literal, numeric, id;
 non terminal math_op_mult, math_op_sum;
@@ -127,14 +128,15 @@ stmnt_list   ::= stmnt
             ;
 stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
             | swap_stmnt | print_stmnt | input_stmnt | call_stmnt | func_call | sep
-            | LABEL | STOP | END | RETURN
-            ;//TODO
+            | LABEL | END | RETURN
+            ;
 sep         ::= LINEEND | COLON;
 
 //Statements
 declaration ::= VAR id | DIM id
+            |   VAR id LBRACK expr_list RBRACK | DIM id LBRACK expr_list RBRACK
             |   VAR asig | DIM asig
-            ;//include arrays
+            ;//TODO: multiple declarations in one line, check if array and var mix is possible  
 asig        ::= id EQ expr
             |   id LBRACK expr RBRACK EQ expr
             ;
@@ -165,7 +167,7 @@ goto_stmnt  ::= GOTO LABEL
             |   GOSUB LABEL
             ;
 
-def_stmnt   ::= DEF id def_params sep stmnt_list sep END
+/* def_stmnt   ::= DEF id def_params sep stmnt_list sep END
             ;
 def_params  ::= LPAREN var_list RPAREN
             |;
@@ -174,7 +176,7 @@ call_stmnt  ::= CALL STRING call_argmts OUT var_list
             | ID EQ CALL LPAREN STRING call_argmts RPAREN ;
 call_argmts ::= COMA ID call_argmts
             | COMA ID
-            |;
+            |; */
 
 func_call   ::= simp_func_call | multi_func_call | method_call;
 simp_func_call  ::= id LPAREN var_list RPAREN
@@ -185,6 +187,14 @@ multi_func_call ::= id var_list OUT var_list
                 ;
 method_call ::= id
             ;//Hopefully won't cause trouble
+
+var_list    ::= id COMMA var_list
+            |   id
+            ;
+
+expr_list   ::= expr COMMA expr_list
+            |   expr
+            ;
 
 increment_stmnt ::= INC id
                 |   INC id COMMA expr
