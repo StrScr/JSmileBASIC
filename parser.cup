@@ -90,17 +90,19 @@ terminal UMINUS;
     bin -> Binary
     sep -> Separator
     func -> Function
+    opt -> Optional
 */
 
 //Statements
+//TODO: Reorganize this section a bit
 non terminal stmnt_list, stmnt;
 non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt, case_list;
 non terminal goto_stmnt;
 non terminal def_stmnt, var_list;
-non terminal call_stmnt, expr_list;
-non terminal def_params, call_argmts;
+non terminal call_stmnt, ret_call_stmnt, expr_list, opt_expr_list;
+non terminal def_params;
 non terminal func_call;
 non terminal simp_func_call, multi_func_call, method_call;
 non terminal increment_stmnt, swap_stmnt;
@@ -190,16 +192,19 @@ goto_stmnt  ::= GOTO LABEL
             |   GOSUB LABEL
             ;
 
-/* def_stmnt   ::= DEF id def_params sep stmnt_list sep END
+def_stmnt   ::= DEF id def_params sep stmnt_list sep END
             ;
 def_params  ::= LPAREN var_list RPAREN
-            |;
+            |   LPAREN RPAREN
+            |   var_list OUT var_list
+            |   OUT var_list
+            |   empty
+            ;
 
-call_stmnt  ::= CALL STRING call_argmts OUT var_list
-            | ID EQ CALL LPAREN STRING call_argmts RPAREN ;
-call_argmts ::= COMA ID call_argmts
-            | COMA ID
-            |; */
+call_stmnt  ::= CALL STRING opt_expr_list
+            |   CALL STRING opt_expr_list OUT var_list
+ret_call_stmnt  ::= CALL LPAREN STRING opt_expr_list RPAREN
+                ;
 
 func_call   ::= simp_func_call
             |   multi_func_call
@@ -220,6 +225,9 @@ var_list    ::= id COMMA var_list
 expr_list   ::= expr COMMA expr_list
             |   expr
             ;
+opt_expr_list   ::= COMMA expr_list
+                |   empty
+                ;//Used with CALL
 
 increment_stmnt ::= INC id
                 |   INC id COMMA expr
@@ -258,6 +266,7 @@ expr    ::= expr bin_logic_op expr
         |   id
         |   id LBRACK expr RBRACK
         |   simp_func_call
+        |   ret_call_stmnt
         ;
 
 //Expression Terminal Groups
