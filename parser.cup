@@ -173,8 +173,8 @@ loop        ::= for_stmnt
             |   while_stmnt
             |   repeat_stmnt
             ;
-for_stmnt   ::= FOR ID EQ numeric TO numeric sep stmnt_list sep NEXT
-            |   FOR ID EQ numeric TO numeric STEP numeric sep stmnt_list sep NEXT
+for_stmnt   ::= FOR id EQ numeric TO numeric sep stmnt_list sep NEXT
+            |   FOR id EQ numeric TO numeric STEP numeric sep stmnt_list sep NEXT
             ;//Check if any expr possible (strings). Check if asig obligatory
 while_stmnt ::= WHILE expr sep stmnt_loop_list sep WEND
             ;
