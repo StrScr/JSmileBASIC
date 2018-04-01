@@ -92,7 +92,7 @@ terminal UMINUS;
 non terminal stmnt_list, stmnt;
 non terminal declaration, asig;
 non terminal conditional, loop;
-non terminal if_stmnt, if_2, on_stmnt;
+non terminal if_stmnt, if_2, on_stmnt, case_list;
 non terminal goto_stmnt;
 non terminal def_stmnt, var_list;
 non terminal call_stmnt, expr_list;
@@ -123,45 +123,64 @@ precedence left UMINUS, NOT, BIT_NOT;
 
 start with stmnt_list;
 
-stmnt_list   ::= stmnt
+stmnt_list  ::= stmnt
             |   stmnt sep stmnt_list
             ;
 stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
-            | swap_stmnt | print_stmnt | input_stmnt | call_stmnt | func_call | sep
-            | LABEL | END | RETURN
+            |   swap_stmnt | print_stmnt | input_stmnt | call_stmnt | func_call
+            |   LABEL | END | RETURN
+            |   empty
             ;
-sep         ::= LINEEND | COLON;
+sep         ::= LINEEND
+            |   COLON
+            ;
 
 //Statements
-declaration ::= VAR id | DIM id
-            |   VAR id LBRACK expr_list RBRACK | DIM id LBRACK expr_list RBRACK
-            |   VAR asig | DIM asig
-            ;//TODO: multiple declarations in one line, check if array and var mix is possible  
+declaration ::= VAR id
+            |   DIM id
+            |   VAR id LBRACK expr_list RBRACK
+            |   DIM id LBRACK expr_list RBRACK
+            |   VAR asig
+            |   DIM asig
+            ;//TODO: multiple declarations in one line, check if array/var/asig mix is possible  
 asig        ::= id EQ expr
             |   id LBRACK expr RBRACK EQ expr
             ;
 
-conditional ::= if_stmnt | on_stmnt;
+conditional ::= if_stmnt
+            |   on_stmnt
+            ;
 if_stmnt    ::= IF expr THEN stmnt_list if_2 sep ENDIF
             ;
 if_2        ::= sep ELSEIF expr THEN stmnt_list sep if_2
             |   sep ELSE stmnt_list
             |   empty
             ;
-on_stmnt    ::= ON expr
-            ;//TODO
-
-loop        ::= for_stmnt | while_stmnt | repeat_stmnt;
-for_stmnt   ::= FOR ID EQ NUMBER TO NUMBER sep stmnt_list sep NEXT
-            |   FOR ID EQ NUMBER TO NUMBER STEP NUMBER sep stmnt_list sep NEXT
+on_stmnt    ::= ON expr sep case_list sep WON
             ;
+case_list   ::= CASE literal sep stmnt_loop_list case_list
+            |   DEFAULT sep stmnt_loop_list case_list
+            |   empty
+            ;
+
+loop        ::= for_stmnt
+            |   while_stmnt
+            |   repeat_stmnt
+            ;
+for_stmnt   ::= FOR ID EQ numeric TO numeric sep stmnt_list sep NEXT
+            |   FOR ID EQ numeric TO numeric STEP numeric sep stmnt_list sep NEXT
+            ;//Check if any expr possible (strings). Check if asig obligatory
 while_stmnt ::= WHILE expr sep stmnt_loop_list sep WEND
             ;
 repeat_stmnt::= REPEAT sep stmnt_loop_list sep UNTIL expr
             ;
 stmnt_loop_list ::= stmnt_loop
-                |   stmnt_loop sep stmnt_loop_list;
-stmnt_loop  ::= stmnt | BREAK | CONTINUE;
+                |   stmnt_loop sep stmnt_loop_list
+                ;
+stmnt_loop  ::= stmnt
+            |   BREAK
+            |   CONTINUE
+            ;
 
 goto_stmnt  ::= GOTO LABEL
             |   GOSUB LABEL
@@ -178,7 +197,9 @@ call_argmts ::= COMA ID call_argmts
             | COMA ID
             |; */
 
-func_call   ::= simp_func_call | multi_func_call | method_call;
+func_call   ::= simp_func_call
+            |   multi_func_call
+            |   method_call;
 simp_func_call  ::= id LPAREN var_list RPAREN
                 |   id LPAREN RPAREN
                 ;
