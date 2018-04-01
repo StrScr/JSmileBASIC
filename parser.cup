@@ -203,12 +203,14 @@ def_params  ::= LPAREN var_list RPAREN
 
 call_stmnt  ::= CALL STRING opt_expr_list
             |   CALL STRING opt_expr_list OUT var_list
+            ;
 ret_call_stmnt  ::= CALL LPAREN STRING opt_expr_list RPAREN
                 ;
 
 func_call   ::= simp_func_call
             |   multi_func_call
-            |   method_call;
+            |   method_call
+            ;
 simp_func_call  ::= id LPAREN var_list RPAREN
                 |   id LPAREN RPAREN
                 ;
