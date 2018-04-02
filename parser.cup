@@ -101,7 +101,7 @@ non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt, case_list;
 non terminal goto_stmnt;
 non terminal def_stmnt, var_list;
-non terminal call_stmnt, ret_call_stmnt, expr_list, opt_expr_list;
+non terminal call_stmnt, ret_call_stmnt, expr_list;
 non terminal def_params;
 non terminal func_call;
 non terminal simp_func_call, multi_func_call, method_call;
@@ -115,8 +115,6 @@ non terminal sep;
 non terminal expr, literal, numeric, id;
 non terminal math_op_mult, math_op_sum;
 non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
-//Special
-non terminal empty;
 
 /* Precedence */
 precedence left ANDAND, OROR;
@@ -158,17 +156,18 @@ asig        ::= id EQ expr
 conditional ::= if_stmnt
             |   on_stmnt
             ;
-if_stmnt    ::= IF expr THEN stmnt_list if_2 sep ENDIF
+if_stmnt    ::= IF expr THEN stmnt_list if_2
             ;
-if_2        ::= sep ELSEIF expr THEN stmnt_list sep if_2
-            |   sep ELSE stmnt_list
-            |   empty
+if_2        ::= sep ELSEIF expr THEN stmnt_list if_2
+            |   sep ELSE stmnt_list sep ENDIF
+            |   sep ENDIF
             ;
 on_stmnt    ::= ON expr sep case_list sep WON
             ;
 case_list   ::= CASE literal sep stmnt_loop_list case_list
             |   DEFAULT sep stmnt_loop_list case_list
-            |   empty
+            |   CASE literal sep stmnt_loop_list
+            |   DEFAULT sep stmnt_loop_list
             ;
 
 loop        ::= for_stmnt
@@ -195,19 +194,22 @@ goto_stmnt  ::= GOTO LABEL
             |   GOSUB LABEL
             ;
 
-def_stmnt   ::= DEF id def_params sep stmnt_list sep END
+def_stmnt   ::= DEF id def_params stmnt_list sep END
             ;
-def_params  ::= LPAREN var_list RPAREN
-            |   LPAREN RPAREN
-            |   var_list OUT var_list
-            |   OUT var_list
-            |   empty
+def_params  ::= LPAREN var_list RPAREN sep
+            |   LPAREN RPAREN sep
+            |   var_list OUT var_list sep
+            |   OUT var_list sep
+            |   sep
             ;
 
-call_stmnt  ::= CALL STRING opt_expr_list
-            |   CALL STRING opt_expr_list OUT var_list
+call_stmnt  ::= CALL STRING 
+            |   CALL STRING COMMA expr_list
+            |   CALL STRING OUT var_list
+            |   CALL STRING COMMA expr_list OUT var_list
             ;
-ret_call_stmnt  ::= CALL LPAREN STRING opt_expr_list RPAREN
+ret_call_stmnt  ::= CALL LPAREN STRING RPAREN
+                |   CALL LPAREN STRING COMMA expr_list RPAREN
                 ;
 
 func_call   ::= simp_func_call
@@ -230,9 +232,6 @@ var_list    ::= id COMMA var_list
 expr_list   ::= expr COMMA expr_list
             |   expr
             ;
-opt_expr_list   ::= COMMA expr_list
-                |   empty
-                ;//Used with CALL
 
 increment_stmnt ::= INC id
                 |   INC id COMMA expr
@@ -249,7 +248,8 @@ print_stmnt ::= PRINT print_list
 print_list  ::= expr COMMA print_list
             |   expr SEMICOLON print_list
             |   expr
-            |   empty
+            |   COMMA
+            |   SEMICOLON
             ;
 
 input_stmnt ::= INPUT STRING SEMICOLON var_list
@@ -285,6 +285,3 @@ bin_logic_op    ::= ANDAND | OROR;
 literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
 numeric     ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | NUMBER | DECIMAL | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
-
-//Special
-empty   ::=;
