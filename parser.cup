@@ -7,8 +7,6 @@
         Allow for multidimensional arrays (Currently one-dimensional)
 */
 
-package JSmileBASIC;
-
 import java.io.*;
 import java_cup.runtime.*;
 
