@@ -193,8 +193,8 @@ StringCharacter = [^\r\n\"]
 <STRING> {
     \"                  {yybegin(YYINITIAL); return symbol(sym.STRING, string.toString());}
     {StringCharacter}+  {string.append(yytext());}
-    {LineEnd}           {throw new RuntimeException("Unterminated string at end of line "+(yyline+1));}
+    {LineEnd}           {System.out.println("Error Lexico: Ln "+(yyline+1)+". String sin cerrar.");}
 }
 
 //Anything that doesn't match
-[^]     {throw new Error("Lexic error on line "+(yyline+1)+", column "+(yycolumn+1)+": I don't know what this is!: "+yytext());}
+[^]     {System.out.println("Error Lexico: Ln "+(yyline+1)+", Col "+(yycolumn+1)+". Texto desconocido: "+yytext());}
