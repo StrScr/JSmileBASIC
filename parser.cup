@@ -13,12 +13,12 @@ import java_cup.runtime.*;
 parser code
 {:
     public void syntax_error(Symbol s){
-        report_error("Error de sintaxis. Linea: " + (s.right + 1) +
-            " Columna: " + s.left + ". Texto: \"" + s.value + "\"", null);
+        report_error("Error de Sintaxis: Ln " + (s.left + 1) +
+            ", Col " + (s.right+1) + ". Simbolo: \"" + s.value + "\"\n", null);
     }
 
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
-        report_fatal_error("Fatal Error: " + s.value, null);
+        report_fatal_error("Error Fatal: " + s.value + "\n", null);
     }
 
 :}
