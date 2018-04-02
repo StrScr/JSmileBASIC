@@ -13,12 +13,12 @@ import java_cup.runtime.*;
 parser code
 {:
     public void syntax_error(Symbol s){
-        report_error("Error de Sintaxis: Ln " + (s.left + 1) +
-            ", Col " + (s.right+1) + ". Simbolo: \"" + s.value + "\"\n", null);
+        report_error("Error Sintactico: Ln " + (s.left + 1) +
+            ", Col " + (s.right+1) + ". Simbolo " + sym.terminalNames[s.sym] + ((s.value==null)?"":": "+s.value) +"\n", null);
     }
 
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception {
-        report_fatal_error("Error Fatal: " + s.value + "\n", null);
+        report_fatal_error("Error Sintactico Fatal: " + s + "\n", null);
     }
 
 :}
@@ -99,7 +99,7 @@ non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt, case_list;
 non terminal goto_stmnt;
-non terminal def_stmnt, var_list;
+non terminal def_stmnt, var_list, return_stmnt;
 non terminal call_stmnt, ret_call_stmnt, expr_list;
 non terminal def_params;
 non terminal func_call;
@@ -136,12 +136,13 @@ stmnt_list  ::= stmnt sep stmnt_list
             ;
 ex_stmnt_list   ::= stmnt sep ex_stmnt_list
                 |   END sep ex_stmnt_list
+                |   sep ex_stmnt_list
                 |   stmnt sep
                 |   END sep
                 ;
 stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
-            |   swap_stmnt | print_stmnt | input_stmnt | call_stmnt | func_call
-            |   LABEL | RETURN | BREAK | CONTINUE
+            |   swap_stmnt | print_stmnt | input_stmnt | call_stmnt | func_call | return_stmnt
+            |   LABEL | BREAK | CONTINUE
             ;
 sep         ::= LINEEND
             |   COLON
@@ -200,6 +201,9 @@ def_params  ::= LPAREN var_list RPAREN sep
             |   OUT var_list sep
             |   sep
             ;
+return_stmnt::= RETURN expr
+            |   RETURN
+            ;
 
 call_stmnt  ::= CALL STRING 
             |   CALL STRING COMMA expr_list
@@ -214,10 +218,10 @@ func_call   ::= simp_func_call
             |   multi_func_call
             |   method_call
             ;
-simp_func_call  ::= id LPAREN var_list RPAREN
+simp_func_call  ::= id LPAREN expr_list RPAREN
                 |   id LPAREN RPAREN
                 ;
-multi_func_call ::= id var_list OUT var_list
+multi_func_call ::= id expr_list OUT var_list
                 |   id OUT var_list
                 ;
 method_call ::= id
