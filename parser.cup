@@ -95,7 +95,8 @@ terminal UMINUS;
 
 //Statements
 //TODO: Reorganize this section a bit
-non terminal stmnt_list, stmnt;
+non terminal program;
+non terminal stmnt_list, stmnt, ex_stmnt_list;
 non terminal declaration, asig;
 non terminal conditional, loop;
 non terminal if_stmnt, if_2, on_stmnt, case_list;
@@ -108,7 +109,7 @@ non terminal simp_func_call, multi_func_call, method_call;
 non terminal increment_stmnt, swap_stmnt;
 non terminal print_stmnt, print_list;
 non terminal input_stmnt;
-non terminal for_stmnt, while_stmnt, repeat_stmnt, stmnt_loop_list, stmnt_loop;
+non terminal for_stmnt, while_stmnt, repeat_stmnt;
 non terminal sep;
 //LATER TODO: read, data, restore, exec, use
 //Expressions
@@ -127,15 +128,22 @@ precedence left UMINUS, NOT, BIT_NOT;
 
 /* Grammar */
 
-start with stmnt_list;
+start with program;
 
-stmnt_list  ::= stmnt sep
-            |   stmnt sep stmnt_list
+program     ::= ex_stmnt_list;
+
+stmnt_list  ::= stmnt sep stmnt_list
             |   sep stmnt_list
+            |   stmnt sep
             ;
+ex_stmnt_list   ::= stmnt sep ex_stmnt_list
+                |   END sep ex_stmnt_list
+                |   stmnt sep
+                |   END sep
+                ;
 stmnt       ::= declaration | asig | conditional | loop | goto_stmnt | def_stmnt | increment_stmnt
             |   swap_stmnt | print_stmnt | input_stmnt | call_stmnt | func_call
-            |   LABEL | END | RETURN
+            |   LABEL | RETURN | BREAK | CONTINUE
             ;
 sep         ::= LINEEND
             |   COLON
@@ -156,38 +164,30 @@ asig        ::= id EQ expr
 conditional ::= if_stmnt
             |   on_stmnt
             ;
-if_stmnt    ::= IF expr THEN stmnt_list if_2
+if_stmnt    ::= IF expr THEN ex_stmnt_list if_2
             ;
-if_2        ::= ELSEIF expr THEN stmnt_list if_2
-            |   ELSE stmnt_list ENDIF
+if_2        ::= ELSEIF expr THEN ex_stmnt_list if_2
+            |   ELSE ex_stmnt_list ENDIF
             |   ENDIF
             ;
-on_stmnt    ::= ON expr sep case_list sep WON
+on_stmnt    ::= ON expr sep case_list WON
             ;
-case_list   ::= CASE literal sep stmnt_loop_list case_list
-            |   DEFAULT sep stmnt_loop_list case_list
-            |   CASE literal sep stmnt_loop_list
-            |   DEFAULT sep stmnt_loop_list
+case_list   ::= CASE literal sep ex_stmnt_list case_list
+            |   DEFAULT sep ex_stmnt_list case_list
+            |   CASE literal sep ex_stmnt_list
+            |   DEFAULT sep ex_stmnt_list
             ;
 
 loop        ::= for_stmnt
             |   while_stmnt
             |   repeat_stmnt
             ;
-for_stmnt   ::= FOR id EQ numeric TO numeric sep stmnt_list NEXT
-            |   FOR id EQ numeric TO numeric STEP numeric sep stmnt_list NEXT
+for_stmnt   ::= FOR id EQ numeric TO numeric sep ex_stmnt_list NEXT
+            |   FOR id EQ numeric TO numeric STEP numeric sep ex_stmnt_list NEXT
             ;//Check if any expr possible (strings). Check if asig obligatory
-while_stmnt ::= WHILE expr sep stmnt_loop_list WEND
+while_stmnt ::= WHILE expr sep ex_stmnt_list WEND
             ;
-repeat_stmnt::= REPEAT sep stmnt_loop_list UNTIL expr
-            ;
-stmnt_loop_list ::= stmnt_loop sep
-                |   stmnt_loop sep stmnt_loop_list
-                |   sep stmnt_loop_list
-                ;
-stmnt_loop  ::= stmnt
-            |   BREAK
-            |   CONTINUE
+repeat_stmnt::= REPEAT sep ex_stmnt_list UNTIL expr
             ;
 
 goto_stmnt  ::= GOTO LABEL
