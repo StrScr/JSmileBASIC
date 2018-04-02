@@ -129,7 +129,7 @@ precedence left UMINUS, NOT, BIT_NOT;
 
 start with stmnt_list;
 
-stmnt_list  ::= stmnt
+stmnt_list  ::= stmnt sep
             |   stmnt sep stmnt_list
             |   sep stmnt_list
             ;
@@ -158,9 +158,9 @@ conditional ::= if_stmnt
             ;
 if_stmnt    ::= IF expr THEN stmnt_list if_2
             ;
-if_2        ::= sep ELSEIF expr THEN stmnt_list if_2
-            |   sep ELSE stmnt_list sep ENDIF
-            |   sep ENDIF
+if_2        ::= ELSEIF expr THEN stmnt_list if_2
+            |   ELSE stmnt_list ENDIF
+            |   ENDIF
             ;
 on_stmnt    ::= ON expr sep case_list sep WON
             ;
@@ -174,14 +174,14 @@ loop        ::= for_stmnt
             |   while_stmnt
             |   repeat_stmnt
             ;
-for_stmnt   ::= FOR id EQ numeric TO numeric sep stmnt_list sep NEXT
-            |   FOR id EQ numeric TO numeric STEP numeric sep stmnt_list sep NEXT
+for_stmnt   ::= FOR id EQ numeric TO numeric sep stmnt_list NEXT
+            |   FOR id EQ numeric TO numeric STEP numeric sep stmnt_list NEXT
             ;//Check if any expr possible (strings). Check if asig obligatory
-while_stmnt ::= WHILE expr sep stmnt_loop_list sep WEND
+while_stmnt ::= WHILE expr sep stmnt_loop_list WEND
             ;
-repeat_stmnt::= REPEAT sep stmnt_loop_list sep UNTIL expr
+repeat_stmnt::= REPEAT sep stmnt_loop_list UNTIL expr
             ;
-stmnt_loop_list ::= stmnt_loop
+stmnt_loop_list ::= stmnt_loop sep
                 |   stmnt_loop sep stmnt_loop_list
                 |   sep stmnt_loop_list
                 ;
@@ -194,7 +194,7 @@ goto_stmnt  ::= GOTO LABEL
             |   GOSUB LABEL
             ;
 
-def_stmnt   ::= DEF id def_params stmnt_list sep END
+def_stmnt   ::= DEF id def_params stmnt_list END
             ;
 def_params  ::= LPAREN var_list RPAREN sep
             |   LPAREN RPAREN sep
