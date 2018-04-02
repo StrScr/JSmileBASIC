@@ -1,7 +1,7 @@
-DEF fibo(VAR n,x,y)
-   IF (n<=1)
-      RETURN X+Y;
+DEF fibo(n,x,y)
+   IF (n<=1) THEN
+      RETURN X+Y
    ELSE
-      RETURN fibo(ºn-1,~y,`x+y)
+      RETURN fibo(n-1,~y,`x+y)
    ENDIF
 END   /***/
