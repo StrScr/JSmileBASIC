@@ -115,6 +115,8 @@ non terminal sep;
 non terminal expr, literal, numeric, id;
 non terminal math_op_mult, math_op_sum;
 non terminal bin_relation_op, bin_bit_op, bin_logic_op, bit_shift, unary_op;
+//Special
+non terminal empty;
 
 /* Precedence */
 precedence left ANDAND, OROR;
@@ -282,3 +284,6 @@ bin_logic_op    ::= ANDAND | OROR;
 literal     ::= NUMBER | DECIMAL | STRING | TRUE | FALSE;
 numeric     ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | NUMBER | DECIMAL | TRUE | FALSE;
 id          ::= IDENTIFIER_INTEGER | IDENTIFIER_DECIMAL | IDENTIFIER_STRING;
+
+//Special
+empty   ::=;//Nothing
