@@ -260,7 +260,6 @@ input_stmnt ::= INPUT STRING SEMICOLON var_list
 //Expressions
 expr    ::= expr bin_logic_op expr
         |   expr bin_bit_op expr
-        |   expr bin_logic_op expr
         |   expr bit_shift expr
         |   expr math_op_sum expr
         |   expr math_op_mult expr
