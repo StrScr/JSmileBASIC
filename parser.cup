@@ -218,9 +218,10 @@ func_call   ::= simp_func_call
             |   multi_func_call
             |   method_call
             ;
-simp_func_call  ::= id LPAREN expr_list RPAREN
+simp_func_call  ::= id LPAREN expr COMMA expr_list RPAREN
+                |   id LPAREN expr RPAREN
                 |   id LPAREN RPAREN
-                ;
+                ;//I have no idea why LPAREN expr_list RPAREN doesn't work, but this does.
 multi_func_call ::= id expr_list OUT var_list
                 |   id OUT var_list
                 ;
