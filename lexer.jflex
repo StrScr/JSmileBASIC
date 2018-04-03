@@ -44,12 +44,12 @@ InputChar = [^\r\n]
 Whitespace = [ \t\f]
 BaseIdentifier = [A-Za-z_][A-Za-z_0-9]*
 Comment = ("rem"|("'"|"rem "){InputChar}*){LineEnd}?
-MultiLineComment = "#".*"/#"
 NumberLiteral = [0-9]+
 DecimalLiteral = {NumberLiteral}"."{NumberLiteral}
 StringCharacter = [^\r\n\"]
 
 %state STRING
+%state MULTICOMMENT
 
 %%
 
@@ -185,15 +185,22 @@ StringCharacter = [^\r\n\"]
     /*
         Ignored
     */
+    "#"                 {yybegin(MULTICOMMENT);}
     {Whitespace}        {}
     {Comment}           {}
-    {MultiLineComment}  {}
 }
 
 <STRING> {
     \"                  {yybegin(YYINITIAL); return symbol(sym.STRING, string.toString());}
     {StringCharacter}+  {string.append(yytext());}
     {LineEnd}           {System.out.println("Error Lexico: Ln "+(yyline+1)+". String sin cerrar.");}
+}
+
+<MULTICOMMENT> {
+    "/#"    {yybegin(YYINITIAL);}
+    [^/\n]+ {}// eat comment in chunks
+    "/"     {}// eat the lone slash
+    \n      {yyline++;}
 }
 
 //Anything that doesn't match
