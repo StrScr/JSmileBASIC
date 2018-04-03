@@ -25,4 +25,3 @@ WHILE (NUM# != 9)
     ENDIF
     PRINT COLOR$
 WEND
-
