@@ -2,6 +2,9 @@ DEF fibo(n,x,y)
    IF (n<=1) THEN
       RETURN X+Y
    ELSE
+   #
+    Este es un comentario multilinea
+   /# 
       RETURN fibo(n-1,~y,`x+y)
    ENDIF
-END   /***/
+END
