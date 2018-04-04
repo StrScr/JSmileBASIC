@@ -86,15 +86,13 @@ class LabelStmnt extends Stmnt{
 
 class DecStmnt extends Stmnt{
     IdExpr id;
-    boolean isArray;
     Expr arrSize;
     Expr asig;
-    public DecStmnt(IdExpr i, boolean arr, Expr arrs, Expr a){
+    public DecStmnt(IdExpr i, Expr arrs, Expr a){
         this.id = i;
-        this.isArray = arr;
         this.arrSize = arrs;
         this.asig = a;
-        this.desc = "Declaration" + (arr ? " (Array)" : "");
+        this.desc = "Declaration" + ((arrs==null) ? " (Array)" : "");
     }
 }
 
@@ -153,10 +151,10 @@ class WhileStmnt extends Stmnt{
     }
 }
 
-class RepeatSmnt extends Stmnt{
+class RepeatStmnt extends Stmnt{
     Expr condition;
     StmntList list;
-    public RepeatSmnt(Expr c, StmntList l){
+    public RepeatStmnt(Expr c, StmntList l){
         this.condition = c;
         this.list = l;
         this.desc = "Repeat";
