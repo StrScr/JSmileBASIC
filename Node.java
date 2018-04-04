@@ -5,6 +5,22 @@ public abstract class Node{
     public String toString(){
         return desc;
     }
+
+    abstract void printTree(int depth);
+    
+    void safePrint(Node n, int depth){
+        if(n!=null){
+            n.printTree(depth);
+        }
+    }
+
+    String stringMult(String s, int n){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < n; i++){
+            sb.append(s);
+        }
+        return sb.toString();
+    }
 }
 
 /*
@@ -22,6 +38,11 @@ class BinExpr extends Expr{
         this.op = op;
         this.desc = sym.terminalNames[op];
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        e1.printTree(depth+1);
+        e2.printTree(depth+1);
+    }
 }
 
 class UnExpr extends Expr{
@@ -31,6 +52,10 @@ class UnExpr extends Expr{
         this.e = e;
         this.op = op;
         this.desc = sym.terminalNames[op];
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        e.printTree(depth+1);
     }
 }
 
@@ -42,6 +67,9 @@ class IdExpr extends Expr{
         this.name = n;
         this.desc = sym.terminalNames[t] + ": " + n;
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+    }
 }
 
 class LiteralExpr<T> extends Expr{
@@ -49,6 +77,9 @@ class LiteralExpr<T> extends Expr{
     public LiteralExpr(T v){
         this.value = v;
         this.desc = "" + v;
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
     }
 }
 
@@ -66,6 +97,11 @@ class StmntList extends Node{
         this.tail = t;
         this.desc = "Statement List";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        head.printTree(depth+1);
+        safePrint(tail, depth+1);
+    }
 }
 
 class SimpleStmnt extends Stmnt{
@@ -74,6 +110,9 @@ class SimpleStmnt extends Stmnt{
         this.type = t;
         this.desc = sym.terminalNames[t];
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+    }
 }
 
 class LabelStmnt extends Stmnt{
@@ -81,7 +120,10 @@ class LabelStmnt extends Stmnt{
     public LabelStmnt(String n){
         this.name = n;
         this.desc = "Label " + n;
-    }    
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+    }
 }
 
 class DecStmnt extends Stmnt{
@@ -93,6 +135,12 @@ class DecStmnt extends Stmnt{
         this.arrSize = arrs;
         this.asig = a;
         this.desc = "Declaration" + ((arrs==null) ? " (Array)" : "");
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        id.printTree(depth+1);
+        safePrint(arrSize, depth+1);
+        safePrint(asig, depth+1);
     }
 }
 
@@ -106,6 +154,12 @@ class AssignStmnt extends Stmnt{
         this.asig = a;
         this.desc = "Assignment";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        id.printTree(depth+1);
+        safePrint(arrPos, depth+1);
+        asig.printTree(depth+1);
+    }
 }
 
 class IfStmnt extends Stmnt{
@@ -118,10 +172,19 @@ class IfStmnt extends Stmnt{
         this.onFalse = f;
         this.desc = "If";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        condition.printTree(depth+1);
+        onTrue.printTree(depth+1);
+        safePrint(onFalse, depth+1);
+    }
 }
 
 class OnStmnt extends Stmnt{
     //todo
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + "I'm not done :(");
+    }
 }
 
 class ForStmnt extends Stmnt{
@@ -139,6 +202,14 @@ class ForStmnt extends Stmnt{
         this.list = sl;
         this.desc = "For";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        control.printTree(depth+1);
+        asig.printTree(depth+1);
+        limit.printTree(depth+1);
+        step.printTree(depth+1);
+        list.printTree(depth+1);
+    }
 }
 
 class WhileStmnt extends Stmnt{
@@ -148,6 +219,11 @@ class WhileStmnt extends Stmnt{
         this.condition = c;
         this.list = l;
         this.desc = "While";
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        condition.printTree(depth+1);
+        list.printTree(depth+1);
     }
 }
 
@@ -159,6 +235,11 @@ class RepeatStmnt extends Stmnt{
         this.list = l;
         this.desc = "Repeat";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        condition.printTree(depth+1);
+        list.printTree(depth+1);
+    }
 }
 
 class GotoStmnt extends Stmnt{
@@ -168,6 +249,9 @@ class GotoStmnt extends Stmnt{
         this.label = l;
         this.sub = s;
         this.desc = (sub ? "GoSub " : "GoTo ") + label;
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
     }
 }
 
@@ -181,7 +265,13 @@ class DefStmnt extends Stmnt{
         this.arguments = a;
         this.returnVals = r;
         this.list = l;
-        this.desc = "Definition";
+        this.desc = "Definition: " + i;
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        safePrint(arguments, depth+1);
+        safePrint(returnVals, depth+1);
+        list.printTree(depth+1);
     }
 }
 
@@ -190,6 +280,10 @@ class RetStmnt extends Stmnt{
     public RetStmnt(Expr v){
         this.value = v;
         this.desc = "Return";
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        safePrint(value, depth+1);
     }
 }
 
@@ -202,7 +296,12 @@ class CallStmnt extends Stmnt{
         this.name = i;
         this.parameters = p;
         this.returnVals = r;
-        this.desc = "Call";
+        this.desc = "Call: " + i;
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        safePrint(parameters, depth+1);
+        safePrint(returnVals, depth+1);
     }
 }
 
@@ -213,6 +312,11 @@ class SwapStmnt extends Stmnt{
         this.id2 = i2;
         this.desc = "Swap";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        id1.printTree(depth+1);
+        id2.printTree(depth+1);
+    }
 }
 
 class PrintStmnt extends Stmnt{
@@ -220,6 +324,10 @@ class PrintStmnt extends Stmnt{
     public PrintStmnt(ExprList l){
         this.list = l;
         this.desc = "Print";
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        safePrint(list, depth+1);
     }
 }
 
@@ -229,7 +337,11 @@ class InputStmnt extends Stmnt{
     public InputStmnt(String p, VarList l){
         this.prompt = p;
         this.list = l;
-        this.desc = "Input";
+        this.desc = "Input: " + p;
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        safePrint(list, depth+1);
     }
 }
 
@@ -254,6 +366,11 @@ class VarList extends Node{
         this.tail = t;
         this.desc = "Variable List";
     }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        head.printTree(depth+1);
+        safePrint(tail, depth+1);
+    }
 }
 
 class ExprList extends Node{
@@ -263,5 +380,10 @@ class ExprList extends Node{
         this.head = h;
         this.tail = t;
         this.desc = "Expression List";
+    }
+    void printTree(int depth){
+        System.out.println(stringMult(" ",depth) + this.desc);
+        head.printTree(depth+1);
+        safePrint(tail, depth+1);
     }
 }
