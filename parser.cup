@@ -136,7 +136,7 @@ precedence left UMINUS, NOT, BIT_NOT;
 
 start with program;
 
-program     ::= ex_stmnt_list:l     {::}
+program     ::= ex_stmnt_list:l     {:l.printTree(0);:}
             ;//TODO: PRINT AST HERE
 
 stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s,l);:}
