@@ -112,7 +112,11 @@ class StmntList extends Node{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
         head.printTree(depth+1);
-        safePrint(tail, depth+1);
+        StmntList cur = tail;
+        while(cur!=null){
+            cur.head.printTree(depth+1);
+            cur = cur.tail;
+        }
     }
 }
 
@@ -381,7 +385,11 @@ class VarList extends Node{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
         head.printTree(depth+1);
-        safePrint(tail, depth+1);
+        VarList cur = tail;
+        while(cur!=null){
+            cur.head.printTree(depth+1);
+            cur = cur.tail;
+        }
     }
 }
 
@@ -396,6 +404,10 @@ class ExprList extends Node{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
         head.printTree(depth+1);
-        safePrint(tail, depth+1);
+        ExprList cur = tail;
+        while(cur!=null){
+            cur.head.printTree(depth+1);
+            cur = cur.tail;
+        }
     }
 }
