@@ -136,8 +136,9 @@ non terminal Stmnt stmnt;
 non terminal StmntList stmnt_list, ex_stmnt_list;
 non terminal Stmnt declaration, asig;
 non terminal Stmnt conditional, loop;
-non terminal Stmnt if_stmnt, on_stmnt, case_list;
+non terminal Stmnt if_stmnt, on_stmnt;
 non terminal StmntList if_2;
+non terminal CaseList case_list;
 non terminal Stmnt goto_stmnt;
 non terminal Stmnt def_stmnt, return_stmnt;
 non terminal VarList var_list;
@@ -175,7 +176,7 @@ precedence left UMINUS, NOT, BIT_NOT;
 start with program;
 
 program     ::= ex_stmnt_list:l     {:l.printTree(0);BuildAstAsDot(l);:}
-            ;//TODO: PRINT AST HERE
+            ;
 
 stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s,l);:}
             |   sep stmnt_list:l            {:RESULT = l;:}
@@ -229,12 +230,12 @@ if_2        ::= ELSEIF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new Stmnt
             |   ELSE ex_stmnt_list:l ENDIF                  {:RESULT = l;:}
             |   ENDIF                                       {:RESULT = null;:}
             ;
-on_stmnt    ::= ON expr sep case_list WON           {:RESULT = new SimpleStmnt(sym.ON);:}
-            ;//TODO
-case_list   ::= CASE literal sep ex_stmnt_list case_list    {:RESULT = null;:}
-            |   DEFAULT sep ex_stmnt_list case_list         {:RESULT = null;:}
-            |   CASE literal sep ex_stmnt_list              {:RESULT = null;:}
-            |   DEFAULT sep ex_stmnt_list                   {:RESULT = null;:}
+on_stmnt    ::= ON expr:e sep case_list:l WON   {:RESULT = new OnStmnt(e,l);:}
+            ;
+case_list   ::= CASE literal:e sep ex_stmnt_list:l case_list:c  {:RESULT = new CaseList(new Case(e,l),c);:}
+            |   DEFAULT sep ex_stmnt_list:l case_list:c         {:RESULT = new CaseList(new Case(null,l),c);:}
+            |   CASE literal:e sep ex_stmnt_list:l              {:RESULT = new CaseList(new Case(e,l),null);:}
+            |   DEFAULT sep ex_stmnt_list:l                     {:RESULT = new CaseList(new Case(null,l),null);:}
             ;
 
 loop        ::= for_stmnt:s     {:RESULT = s;:}
@@ -243,7 +244,7 @@ loop        ::= for_stmnt:s     {:RESULT = s;:}
             ;
 for_stmnt   ::= FOR id:i EQ numeric:n TO numeric:m sep ex_stmnt_list:l NEXT                 {:RESULT = new ForStmnt(i,n,m,new LiteralExpr<Integer>(new Integer(1)),l);:}
             |   FOR id:i EQ numeric:n TO numeric:m STEP numeric:s sep ex_stmnt_list:l NEXT  {:RESULT = new ForStmnt(i,n,m,s,l);:}
-            ;//Check if any expr possible (strings). Check if asig obligatory
+            ;//TODO: Check if any expr possible (strings). Check if asig obligatory
 while_stmnt ::= WHILE expr:e sep ex_stmnt_list:l WEND   {:RESULT = new WhileStmnt(e,l);:}
             ;
 repeat_stmnt::= REPEAT sep ex_stmnt_list:l UNTIL expr:e {:RESULT = new RepeatStmnt(e,l);:}
@@ -333,8 +334,8 @@ expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.i
         |   literal:e                           {:RESULT = e;:}
         |   id:e                                {:RESULT = e;:}
         |   id:e LBRACK expr:p RBRACK           {:RESULT = e;:}
-        |   simp_func_call:e                    {:RESULT = null;:}
-        |   ret_call_stmnt:e                    {:RESULT = null;:}
+        |   simp_func_call:s                    {:RESULT = null;:}
+        |   ret_call_stmnt:s                    {:RESULT = null;:}
         ;//TODO
 
 //Expression Terminal Groups

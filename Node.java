@@ -243,12 +243,40 @@ class IfStmnt extends Stmnt{
 }
 
 class OnStmnt extends Stmnt{
-    //todo
+    Expr switchvalue;
+    CaseList cases;
+    public OnStmnt(Expr e, CaseList l){
+        this.switchvalue = e;
+        this.cases = l;
+        this.desc = "On";
+    }
     void printTree(int depth){
-        System.out.println(levelInd(depth) + "I'm not done :(");
+        System.out.println(levelInd(depth) + this.desc);
+        switchvalue.printTree(depth+1);
+        cases.printTree(depth+1);
     }
     Node[] getChildren(){
-        return null;
+        Node[] children = {switchvalue,cases};
+        return children;
+    }
+}
+
+class Case extends Node{
+    LiteralExpr mcase;//null if default
+    StmntList list;
+    public Case(LiteralExpr e, StmntList l){
+        this.mcase = e;
+        this.list = l;
+        this.desc = "Case" + ((e==null)?" (Default)":"");
+    }
+    void printTree(int depth){
+        System.out.println(levelInd(depth) + this.desc);
+        safePrint(mcase, depth+1);
+        list.printTree(depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {mcase,list};
+        return children;
     }
 }
 
@@ -505,6 +533,37 @@ class ExprList extends Node{
         System.out.println(levelInd(depth) + this.desc);
         head.printTree(depth+1);
         ExprList cur = tail;
+        while(cur!=null){
+            cur.head.printTree(depth+1);
+            cur = cur.tail;
+        }
+    }
+    Node[] getChildren(){
+        if(tail==null){
+            Node[] children = {head};
+            return children;
+        }else{
+            Node[] t = tail.getChildren();
+            Node[] children = new Node[1 + t.length];
+            children[0] = head;
+            System.arraycopy(t, 0, children, 1, t.length);
+            return children;
+        }
+    }
+}
+
+class CaseList extends Node{
+    Case head;//null means
+    CaseList tail;
+    public CaseList(Case h, CaseList t){
+        this.head = h;
+        this.tail = t;
+        this.desc = "Case List";
+    }
+    void printTree(int depth){
+        System.out.println(levelInd(depth) + this.desc);
+        head.printTree(depth+1);
+        CaseList cur = tail;
         while(cur!=null){
             cur.head.printTree(depth+1);
             cur = cur.tail;
