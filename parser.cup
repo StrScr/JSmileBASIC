@@ -23,8 +23,6 @@ parser code
 
 :}
 
-/* Terminals */
-
 terminal IF, THEN, ELSE, ELSEIF, ENDIF;
 terminal ON, CASE, DEFAULT, WON;
 
@@ -190,11 +188,13 @@ conditional ::= if_stmnt:s  {:RESULT = s;:}
             ;
 if_stmnt    ::= IF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new IfStmnt(e,l,f);:}
 
+
             ;
 if_2        ::= ELSEIF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new StmntList(new IfStmnt(e,l,f),null);:}
             |   ELSE ex_stmnt_list:l ENDIF                  {:RESULT = l;:}
             |   ENDIF                                       {:RESULT = null;:}
-            |   error sep
+            |   error THEN
+            |   error ENDIF
             ;
 on_stmnt    ::= ON expr sep case_list WON           {:RESULT = new SimpleStmnt(sym.ON);:}
 
@@ -213,9 +213,9 @@ loop        ::= for_stmnt:s     {:RESULT = s;:}
 for_stmnt   ::= FOR id:i EQ numeric:n TO numeric:m sep ex_stmnt_list:l NEXT                 {:RESULT = new ForStmnt(i,n,m,new LiteralExpr<Integer>(new Integer(1)),l);:}
             |   FOR id:i EQ numeric:n TO numeric:m STEP numeric:s sep ex_stmnt_list:l NEXT  {:RESULT = new ForStmnt(i,n,m,s,l);:}
 
+
             ;//Check if any expr possible (strings). Check if asig obligatory
 while_stmnt ::= WHILE expr:e sep ex_stmnt_list:l WEND   {:RESULT = new WhileStmnt(e,l);:}
-
 
             ;
 repeat_stmnt::= REPEAT sep ex_stmnt_list:l UNTIL expr:e {:RESULT = new RepeatStmnt(e,l);:}
@@ -250,8 +250,6 @@ call_stmnt  ::= CALL STRING:s                                   {:RESULT = new C
             ;
 ret_call_stmnt  ::= CALL LPAREN STRING:s RPAREN                     {:RESULT = new CallStmnt(s,null,null);:}
                 |   CALL LPAREN STRING:s COMMA expr_list:l RPAREN   {:RESULT = new CallStmnt(s,l,null);:}
-                |   error LPAREN
-                |   error RPAREN
                 |   error COMMA
                 |   error sep
                 ;
@@ -331,6 +329,10 @@ expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.i
         |   error bit_shift
         |   error math_op_sum
         |   error math_op_mult
+        |   error LPAREN
+        |   error RPAREN
+        |   error LBRACK
+        |   error RBRACK
         ;//TODO
 
 //Expression Terminal Groups
