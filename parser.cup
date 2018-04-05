@@ -219,11 +219,9 @@ declaration ::= VAR id:i                        {:RESULT = new DecStmnt(i,null,n
             |   DIM asig:a                      {:RESULT = new DecStmnt(((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
 
             ;//TODO: multiple declarations in one line, check if array/var/asig mix is possible
+
 asig        ::= id:i EQ expr:e                      {:RESULT = new AssignStmnt(i,null,e);:}
             |   id:i LBRACK expr:p RBRACK EQ expr:e {:RESULT = new AssignStmnt(i,p,e);:}
-            |   error LBRACK
-            |   error RBRACK
-            |   error sep
             ;
 
 conditional ::= if_stmnt:s  {:RESULT = s;:}
@@ -254,6 +252,7 @@ for_stmnt   ::= FOR id:i EQ numeric:n TO numeric:m sep ex_stmnt_list:l NEXT     
             |   FOR id:i EQ numeric:n TO numeric:m STEP numeric:s sep ex_stmnt_list:l NEXT  {:RESULT = new ForStmnt(i,n,m,s,l);:}
             ;//TODO: Check if any expr possible (strings). Check if asig obligatory
 while_stmnt ::= WHILE expr:e sep ex_stmnt_list:l WEND   {:RESULT = new WhileStmnt(e,l);:}
+
 
             ;
 repeat_stmnt::= REPEAT sep ex_stmnt_list:l UNTIL expr:e {:RESULT = new RepeatStmnt(e,l);:}
@@ -339,6 +338,7 @@ print_list  ::= expr:e COMMA print_list:l       {:RESULT = new ExprList(e,new Ex
             |   expr:e                          {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>("\n"),null));:}
             |   COMMA                           {:RESULT = new ExprList(new LiteralExpr<String>("  \n"),null);:}
             |   SEMICOLON                       {:RESULT = null;:}
+            |   error SEMICOLON
 
             ;
 
