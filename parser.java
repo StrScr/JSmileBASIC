@@ -2430,7 +2430,7 @@ class CUP$parser$actions {
 		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Stmnt s = (Stmnt)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		RESULT = null;
+		RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expr",33, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
@@ -2442,7 +2442,7 @@ class CUP$parser$actions {
 		int sleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		Stmnt s = (Stmnt)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		RESULT = null;
+		RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);
               CUP$parser$result = parser.getSymbolFactory().newSymbol("expr",33, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

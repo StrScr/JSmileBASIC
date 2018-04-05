@@ -111,6 +111,25 @@ class LiteralExpr<T> extends Expr{
     }
 }
 
+class CallExpr extends Expr{
+    //Expression wrapper for Call statement 
+    String name;
+    ExprList parameters;
+    public CallExpr(String i, ExprList p){
+        this.name = i;
+        this.parameters = p;
+        this.desc = "Call (Expr): " + i;
+    }
+    void printTree(int depth){
+        System.out.println(levelInd(depth) + this.desc);
+        safePrint(parameters, depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {parameters};
+        return children;
+    }
+}
+
 /*
     Statements
 */
@@ -404,7 +423,7 @@ class RetStmnt extends Stmnt{
 }
 
 class CallStmnt extends Stmnt{
-    //TODO: Call can be stmnt and/or expr!!!
+    //Note: Call can be stmnt or expr
     String name;
     ExprList parameters;
     VarList returnVals;

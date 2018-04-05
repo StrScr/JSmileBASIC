@@ -334,8 +334,8 @@ expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.i
         |   literal:e                           {:RESULT = e;:}
         |   id:e                                {:RESULT = e;:}
         |   id:e LBRACK expr:p RBRACK           {:RESULT = e;:}
-        |   simp_func_call:s                    {:RESULT = null;:}
-        |   ret_call_stmnt:s                    {:RESULT = null;:}
+        |   simp_func_call:s                    {:RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);:}
+        |   ret_call_stmnt:s                    {:RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);:}
         ;//TODO
 
 //Expression Terminal Groups
