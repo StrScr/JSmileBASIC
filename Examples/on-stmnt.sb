@@ -1,0 +1,12 @@
+VAR N$
+INPUT "What's your favorite color"; N$
+ON N$
+  CASE "RED":
+    PRINT "It's-a me!"
+  CASE "GREEN":
+    PRINT "WinXP Wallpaper?"
+  CASE "BLUE":
+    PRINT "I like the sea!"
+  DEFAULT:
+    PRINT "I don't know that color!"
+WON
