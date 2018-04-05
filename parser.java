@@ -887,6 +887,43 @@ public class parser extends java_cup.runtime.lr_parser {
 /** Cup generated class to encapsulate user supplied action code.*/
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 class CUP$parser$actions {
+
+
+    int nodeid=0;
+    
+    void BuildAstAsDot(Node n){
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph AST {\n");
+        sb.append(NodeToDot(n,"program"));
+        sb.append("}");
+        try (PrintWriter out = new PrintWriter("ast.dot")) {
+            out.println(sb.toString());
+        }catch(Exception e){
+            System.out.println("Error al escribir AST a archivo.");
+        }
+    }
+
+    String NodeToDot(Node n, String parent){
+        if(n!=null){
+            String dotid = "node" + nodeid;
+            nodeid++;
+            StringBuilder sb = new StringBuilder();
+            Node[] childNodes = n.getChildren();
+            sb.append(dotid + " [label=\"" + n.desc + "\"];\n");
+            sb.append(parent + " -> " + dotid + ";\n");
+            if(childNodes!=null){
+                /* for(Node c : childNodes){
+                    sb.append(NodeToDot(c,dotid));
+                } */
+                for(int i=0; i<childNodes.length; i++){
+                    sb.append(NodeToDot(childNodes[i],dotid));
+                }
+            }
+            return sb.toString();
+        }
+        return "";
+    }
+
   private final parser parser;
 
   /** Constructor */
@@ -929,7 +966,7 @@ class CUP$parser$actions {
 		int lleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int lright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		StmntList l = (StmntList)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
-		l.printTree(0);
+		l.printTree(0);BuildAstAsDot(l);
               CUP$parser$result = parser.getSymbolFactory().newSymbol("program",0, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;

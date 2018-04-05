@@ -7,6 +7,8 @@ public abstract class Node{
     }
 
     abstract void printTree(int depth);
+
+    abstract Node[] getChildren();
     
     void safePrint(Node n, int depth){
         if(n!=null){
@@ -55,6 +57,10 @@ class BinExpr extends Expr{
         e1.printTree(depth+1);
         e2.printTree(depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {e1,e2};
+        return children;
+    }
 }
 
 class UnExpr extends Expr{
@@ -69,6 +75,10 @@ class UnExpr extends Expr{
         System.out.println(levelInd(depth) + this.desc);
         e.printTree(depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {e};
+        return children;
+    }
 }
 
 class IdExpr extends Expr{
@@ -82,16 +92,22 @@ class IdExpr extends Expr{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
     }
+    Node[] getChildren(){
+        return null;
+    }
 }
 
 class LiteralExpr<T> extends Expr{
     T value;
     public LiteralExpr(T v){
         this.value = v;
-        this.desc = unEscapeString("" + v);
+        this.desc = unEscapeString("Literal: " + v);
     }
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
+    }
+    Node[] getChildren(){
+        return null;
     }
 }
 
@@ -118,6 +134,18 @@ class StmntList extends Node{
             cur = cur.tail;
         }
     }
+    Node[] getChildren(){
+        if(tail==null){
+            Node[] children = {head};
+            return children;
+        }else{
+            Node[] t = tail.getChildren();
+            Node[] children = new Node[1 + t.length];
+            children[0] = head;
+            System.arraycopy(t, 0, children, 1, t.length);
+            return children;
+        }
+    }
 }
 
 class SimpleStmnt extends Stmnt{
@@ -129,6 +157,9 @@ class SimpleStmnt extends Stmnt{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
     }
+    Node[] getChildren(){
+        return null;
+    }
 }
 
 class LabelStmnt extends Stmnt{
@@ -139,6 +170,9 @@ class LabelStmnt extends Stmnt{
     }
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
+    }
+    Node[] getChildren(){
+        return null;
     }
 }
 
@@ -158,6 +192,10 @@ class DecStmnt extends Stmnt{
         safePrint(arrSize, depth+1);
         safePrint(asig, depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {id,arrSize,asig};
+        return children;
+    }
 }
 
 class AssignStmnt extends Stmnt{
@@ -175,6 +213,10 @@ class AssignStmnt extends Stmnt{
         id.printTree(depth+1);
         safePrint(arrPos, depth+1);
         asig.printTree(depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {id,arrPos,asig};
+        return children;
     }
 }
 
@@ -194,12 +236,19 @@ class IfStmnt extends Stmnt{
         onTrue.printTree(depth+1);
         safePrint(onFalse, depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {condition,onTrue,onFalse};
+        return children;
+    }
 }
 
 class OnStmnt extends Stmnt{
     //todo
     void printTree(int depth){
         System.out.println(levelInd(depth) + "I'm not done :(");
+    }
+    Node[] getChildren(){
+        return null;
     }
 }
 
@@ -226,6 +275,10 @@ class ForStmnt extends Stmnt{
         step.printTree(depth+1);
         list.printTree(depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {control,asig,limit,step,list};
+        return children;
+    }
 }
 
 class WhileStmnt extends Stmnt{
@@ -240,6 +293,10 @@ class WhileStmnt extends Stmnt{
         System.out.println(levelInd(depth) + this.desc);
         condition.printTree(depth+1);
         list.printTree(depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {condition,list};
+        return children;
     }
 }
 
@@ -256,6 +313,10 @@ class RepeatStmnt extends Stmnt{
         condition.printTree(depth+1);
         list.printTree(depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {condition,list};
+        return children;
+    }
 }
 
 class GotoStmnt extends Stmnt{
@@ -268,6 +329,9 @@ class GotoStmnt extends Stmnt{
     }
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
+    }
+    Node[] getChildren(){
+        return null;
     }
 }
 
@@ -289,6 +353,10 @@ class DefStmnt extends Stmnt{
         safePrint(returnVals, depth+1);
         list.printTree(depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {arguments,returnVals,list};
+        return children;
+    }
 }
 
 class RetStmnt extends Stmnt{
@@ -300,6 +368,10 @@ class RetStmnt extends Stmnt{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
         safePrint(value, depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {value};
+        return children;
     }
 }
 
@@ -319,6 +391,10 @@ class CallStmnt extends Stmnt{
         safePrint(parameters, depth+1);
         safePrint(returnVals, depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {parameters,returnVals};
+        return children;
+    }
 }
 
 class SwapStmnt extends Stmnt{
@@ -333,6 +409,10 @@ class SwapStmnt extends Stmnt{
         id1.printTree(depth+1);
         id2.printTree(depth+1);
     }
+    Node[] getChildren(){
+        Node[] children = {id1,id2};
+        return children;
+    }
 }
 
 class PrintStmnt extends Stmnt{
@@ -344,6 +424,10 @@ class PrintStmnt extends Stmnt{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
         safePrint(list, depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {list};
+        return children;
     }
 }
 
@@ -358,6 +442,10 @@ class InputStmnt extends Stmnt{
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
         safePrint(list, depth+1);
+    }
+    Node[] getChildren(){
+        Node[] children = {list};
+        return children;
     }
 }
 
@@ -391,6 +479,18 @@ class VarList extends Node{
             cur = cur.tail;
         }
     }
+    Node[] getChildren(){
+        if(tail==null){
+            Node[] children = {head};
+            return children;
+        }else{
+            Node[] t = tail.getChildren();
+            Node[] children = new Node[1 + t.length];
+            children[0] = head;
+            System.arraycopy(t, 0, children, 1, t.length);
+            return children;
+        }
+    }
 }
 
 class ExprList extends Node{
@@ -408,6 +508,18 @@ class ExprList extends Node{
         while(cur!=null){
             cur.head.printTree(depth+1);
             cur = cur.tail;
+        }
+    }
+    Node[] getChildren(){
+        if(tail==null){
+            Node[] children = {head};
+            return children;
+        }else{
+            Node[] t = tail.getChildren();
+            Node[] children = new Node[1 + t.length];
+            children[0] = head;
+            System.arraycopy(t, 0, children, 1, t.length);
+            return children;
         }
     }
 }

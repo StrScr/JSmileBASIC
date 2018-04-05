@@ -10,6 +10,44 @@
 import java.io.*;
 import java_cup.runtime.*;
 
+action code
+{:
+    int nodeid=0;
+    
+    void BuildAstAsDot(Node n){
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph AST {\n");
+        sb.append(NodeToDot(n,"program"));
+        sb.append("}");
+        try (PrintWriter out = new PrintWriter("ast.dot")) {
+            out.println(sb.toString());
+        }catch(Exception e){
+            System.out.println("Error al escribir AST a archivo.");
+        }
+    }
+
+    String NodeToDot(Node n, String parent){
+        if(n!=null){
+            String dotid = "node" + nodeid;
+            nodeid++;
+            StringBuilder sb = new StringBuilder();
+            Node[] childNodes = n.getChildren();
+            sb.append(dotid + " [label=\"" + n.desc + "\"];\n");
+            sb.append(parent + " -> " + dotid + ";\n");
+            if(childNodes!=null){
+                /* for(Node c : childNodes){
+                    sb.append(NodeToDot(c,dotid));
+                } */
+                for(int i=0; i<childNodes.length; i++){
+                    sb.append(NodeToDot(childNodes[i],dotid));
+                }
+            }
+            return sb.toString();
+        }
+        return "";
+    }
+:}
+
 parser code
 {:
     public void syntax_error(Symbol s){
@@ -136,7 +174,7 @@ precedence left UMINUS, NOT, BIT_NOT;
 
 start with program;
 
-program     ::= ex_stmnt_list:l     {:l.printTree(0);:}
+program     ::= ex_stmnt_list:l     {:l.printTree(0);BuildAstAsDot(l);:}
             ;//TODO: PRINT AST HERE
 
 stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s,l);:}
