@@ -181,6 +181,7 @@ program     ::= ex_stmnt_list:l     {:l.printTree(0);BuildAstAsDot(l);:}
 stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s,l);:}
             |   sep stmnt_list:l            {:RESULT = l;:}
             |   stmnt:s sep                 {:RESULT = new StmntList(s,null);:}
+            |   error sep
             ;
 ex_stmnt_list   ::= stmnt:s sep ex_stmnt_list:l {:RESULT = new StmntList(s,l);:}
                 |   END sep ex_stmnt_list:l     {:RESULT = new StmntList(new SimpleStmnt(sym.END),l);:}
@@ -216,19 +217,25 @@ declaration ::= VAR id:i                        {:RESULT = new DecStmnt(i,null,n
             |   DIM id:i LBRACK expr:e RBRACK   {:RESULT = new DecStmnt(i,e,null);:}
             |   VAR asig:a                      {:RESULT = new DecStmnt(((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
             |   DIM asig:a                      {:RESULT = new DecStmnt(((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
-            ;//TODO: multiple declarations in one line, check if array/var/asig mix is possible  
+
+            ;//TODO: multiple declarations in one line, check if array/var/asig mix is possible
 asig        ::= id:i EQ expr:e                      {:RESULT = new AssignStmnt(i,null,e);:}
             |   id:i LBRACK expr:p RBRACK EQ expr:e {:RESULT = new AssignStmnt(i,p,e);:}
+            |   error LBRACK
+            |   error RBRACK
+            |   error sep
             ;
 
 conditional ::= if_stmnt:s  {:RESULT = s;:}
             |   on_stmnt:s  {:RESULT = s;:}
             ;
 if_stmnt    ::= IF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new IfStmnt(e,l,f);:}
+
             ;
 if_2        ::= ELSEIF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new StmntList(new IfStmnt(e,l,f),null);:}
             |   ELSE ex_stmnt_list:l ENDIF                  {:RESULT = l;:}
             |   ENDIF                                       {:RESULT = null;:}
+            |   error sep
             ;
 on_stmnt    ::= ON expr:e sep case_list:l WON   {:RESULT = new OnStmnt(e,l);:}
             ;
@@ -236,6 +243,7 @@ case_list   ::= CASE literal:e sep ex_stmnt_list:l case_list:c  {:RESULT = new C
             |   DEFAULT sep ex_stmnt_list:l case_list:c         {:RESULT = new CaseList(new Case(null,l),c);:}
             |   CASE literal:e sep ex_stmnt_list:l              {:RESULT = new CaseList(new Case(e,l),null);:}
             |   DEFAULT sep ex_stmnt_list:l                     {:RESULT = new CaseList(new Case(null,l),null);:}
+            |   error sep
             ;
 
 loop        ::= for_stmnt:s     {:RESULT = s;:}
@@ -246,21 +254,27 @@ for_stmnt   ::= FOR id:i EQ numeric:n TO numeric:m sep ex_stmnt_list:l NEXT     
             |   FOR id:i EQ numeric:n TO numeric:m STEP numeric:s sep ex_stmnt_list:l NEXT  {:RESULT = new ForStmnt(i,n,m,s,l);:}
             ;//TODO: Check if any expr possible (strings). Check if asig obligatory
 while_stmnt ::= WHILE expr:e sep ex_stmnt_list:l WEND   {:RESULT = new WhileStmnt(e,l);:}
+
             ;
 repeat_stmnt::= REPEAT sep ex_stmnt_list:l UNTIL expr:e {:RESULT = new RepeatStmnt(e,l);:}
+
             ;
 
 goto_stmnt  ::= GOTO LABEL:l    {:RESULT = new GotoStmnt(l,false);:}
             |   GOSUB LABEL:l   {:RESULT = new GotoStmnt(l,true);:}
+
             ;
 
 def_stmnt   ::= DEF id:i def_params:p stmnt_list:l END  {:RESULT = new DefStmnt(i.name,p.args,p.ret,l);:}
+
             ;
 def_params  ::= LPAREN var_list:l RPAREN sep    {:RESULT = new DefParam(l,null);:}
             |   LPAREN RPAREN sep               {:RESULT = new DefParam(null,null);:}
             |   var_list:l OUT var_list:r sep   {:RESULT = new DefParam(l,r);:}
             |   OUT var_list:r sep              {:RESULT = new DefParam(null,r);:}
             |   sep                             {:RESULT = new DefParam(null,null);:}
+            |   error RPAREN
+            |   error sep
             ;
 return_stmnt::= RETURN expr:e   {:RESULT = new RetStmnt(e);:}
             |   RETURN          {:RESULT = new RetStmnt(null);:}
@@ -270,9 +284,14 @@ call_stmnt  ::= CALL STRING:s                                   {:RESULT = new C
             |   CALL STRING:s COMMA expr_list:p                 {:RESULT = new CallStmnt(s,p,null);:}
             |   CALL STRING:s OUT var_list:r                    {:RESULT = new CallStmnt(s,null,r);:}
             |   CALL STRING:s COMMA expr_list:p OUT var_list:r  {:RESULT = new CallStmnt(s,p,r);:}
+
             ;
 ret_call_stmnt  ::= CALL LPAREN STRING:s RPAREN                     {:RESULT = new CallStmnt(s,null,null);:}
-                |   CALL LPAREN STRING:s COMMA expr_list:l RPAREN   {:RESULT = new CallStmnt(s,l,null);:} 
+                |   CALL LPAREN STRING:s COMMA expr_list:l RPAREN   {:RESULT = new CallStmnt(s,l,null);:}
+                |   error LPAREN
+                |   error RPAREN
+                |   error COMMA
+                |   error sep
                 ;
 
 func_call   ::= simp_func_call:s    {:RESULT = s;:}
@@ -282,6 +301,7 @@ func_call   ::= simp_func_call:s    {:RESULT = s;:}
 simp_func_call  ::= id:i LPAREN expr:e COMMA expr_list:l RPAREN {:RESULT = new CallStmnt(i.name,new ExprList(e,l),null);:}
                 |   id:i LPAREN expr:e RPAREN                   {:RESULT = new CallStmnt(i.name,new ExprList(e,null),null);:}
                 |   id:i LPAREN RPAREN                          {:RESULT = new CallStmnt(i.name,null,null);:}
+
                 ;//I have no idea why LPAREN expr_list RPAREN doesn't work, but this does.
 multi_func_call ::= id:i expr_list:p OUT var_list:r {:RESULT = new CallStmnt(i.name,p,r);:}
                 |   id:i OUT var_list:r             {:RESULT = new CallStmnt(i.name,null,r);:}
@@ -291,10 +311,13 @@ method_call ::= id:i    {:RESULT = new CallStmnt(i.name, null, null);:}
 
 var_list    ::= id:i COMMA var_list:l   {:RESULT = new VarList(i,l);:}
             |   id:i                    {:RESULT = new VarList(i,null);:}
+            | error COMMA
+            | error sep
             ;
 
 expr_list   ::= expr:e COMMA expr_list:l    {:RESULT = new ExprList(e,l);:}
             |   expr:e                      {:RESULT = new ExprList(e,null);:}
+
             ;
 
 increment_stmnt ::= INC id:i                {:RESULT = new AssignStmnt(i,null,new BinExpr(i,new LiteralExpr<Integer>(new Integer(1)),sym.PLUS));:}
@@ -304,16 +327,19 @@ increment_stmnt ::= INC id:i                {:RESULT = new AssignStmnt(i,null,ne
                 ;
 
 swap_stmnt  ::= SWAP id:i1 COMMA id:i2    {:RESULT = new SwapStmnt(i1, i2);:}
+
             ;
 
 print_stmnt ::= PRINT print_list:l      {:RESULT = new PrintStmnt(l);:}
             |   QUESTION print_list:l   {:RESULT = new PrintStmnt(l);:}
+
             ;
 print_list  ::= expr:e COMMA print_list:l       {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>("  "),l));:}
             |   expr:e SEMICOLON print_list:l   {:RESULT = new ExprList(e,l);:}
             |   expr:e                          {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>("\n"),null));:}
             |   COMMA                           {:RESULT = new ExprList(new LiteralExpr<String>("  \n"),null);:}
             |   SEMICOLON                       {:RESULT = null;:}
+
             ;
 
 input_stmnt ::= INPUT STRING:s SEMICOLON var_list:l             {:RESULT = new InputStmnt(s+"?",l);:}
@@ -336,6 +362,12 @@ expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.i
         |   id:e LBRACK expr:p RBRACK           {:RESULT = e;:}
         |   simp_func_call:s                    {:RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);:}
         |   ret_call_stmnt:s                    {:RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);:}
+        |   error bin_logic_op
+        |   error bin_bit_op
+        |   error bin_relation_op
+        |   error bit_shift
+        |   error math_op_sum
+        |   error math_op_mult
         ;//TODO
 
 //Expression Terminal Groups
