@@ -1,4 +1,6 @@
-public abstract class Node{
+import java.util.ArrayList;
+
+public abstract class Node{// TODO Keep line number and column
     String desc;
 
     @Override
@@ -9,6 +11,8 @@ public abstract class Node{
     abstract void printTree(int depth);
 
     abstract Node[] getChildren();
+
+    abstract boolean semanticTest(Scope curscope, VarTable curtable);
     
     void safePrint(Node n, int depth){
         if(n!=null){
@@ -41,7 +45,9 @@ public abstract class Node{
     Expressions & Endings
 */
 
-abstract class Expr extends Node{}
+abstract class Expr extends Node{
+    abstract int getType();
+}
 
 class BinExpr extends Expr{
     Expr e1, e2;
@@ -61,6 +67,44 @@ class BinExpr extends Expr{
         Node[] children = {e1,e2};
         return children;
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // Expressions must be compatible
+        boolean valid;
+        int t = getType();
+        if(t == sym.error){
+            valid = false;
+            System.out.println("Error Semantico: Expresiones son de tipos incompatibles.");// NOTE Could print many times in long expressions
+        }else{
+            // If resulting type is string, only concatenation is available
+            if(t == sym.IDENTIFIER_STRING && op != sym.PLUS){
+                valid = false;
+                System.out.println("Error Semantico: Expresion entre cadenas solo puede ser concatenacion (+).");
+            }else{
+                // Expression is string concatenation OR numeric (should be compatible for all operations).
+                valid = true;
+            }
+        }
+        return valid && e1.semanticTest(curscope, curtable) && e2.semanticTest(curscope, curtable);
+    }
+    int getType(){
+        // Get resulting type from combination of both sides of expression
+        // Check if both are numeric
+        int t1 = e1.getType();
+        int t2 = e2.getType();
+        if((t1 == sym.IDENTIFIER_INTEGER || t1 == sym.IDENTIFIER_DECIMAL) && (t2 == sym.IDENTIFIER_INTEGER || t2 == sym.IDENTIFIER_DECIMAL)){
+            // Resulting type should be biggest of both sides. AKA decimal if one of them is decimal 
+            return (t1 == sym.IDENTIFIER_DECIMAL || t2 == sym.IDENTIFIER_DECIMAL) ? sym.IDENTIFIER_DECIMAL : sym.IDENTIFIER_INTEGER;
+        }else{
+            // Check if both are strings
+            if(t1 == sym.IDENTIFIER_STRING && t2 == sym.IDENTIFIER_STRING){
+                return sym.IDENTIFIER_STRING;
+            }else{
+                // Types are incompatible OR at least one was already error
+                return sym.error;
+            }
+        }
+        return e.getType();
+    }
 }
 
 class UnExpr extends Expr{
@@ -79,6 +123,21 @@ class UnExpr extends Expr{
         Node[] children = {e};
         return children;
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // Expression must be numeric
+        int t = e.getType();
+        boolean valid;
+        if(t == sym.IDENTIFIER_INTEGER || t == sym.IDENTIFIER_INTEGER){
+            valid = true;
+        }else{
+            System.out.println("Error Semantico: Operaciones unarias solo aplican a tipos numericos.");
+            valid = false;
+        }
+        return valid && e.semanticTest(curscope, curtable);
+    }
+    int getType(){
+        return e.getType();
+    }
 }
 
 class IdExpr extends Expr{
@@ -87,7 +146,8 @@ class IdExpr extends Expr{
     public IdExpr(int t, String n){
         this.type = t;
         this.name = n;
-        this.desc = sym.terminalNames[t] + ": " + n;
+        //this.desc = sym.terminalNames[t] + ": " + n;
+        this.desc = "Variable: " + n;
     }
     void printTree(int depth){
         System.out.println(levelInd(depth) + this.desc);
@@ -95,12 +155,29 @@ class IdExpr extends Expr{
     Node[] getChildren(){
         return null;
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // Check if variable exists
+        boolean valid;
+        try{
+            curtable.getVariable(name, curscope);
+            valid = true;
+        }catch(Exception e){
+            System.out.println("Error Semantico: La variable " + name + "no existe dentro de este ambito.");
+            valid = false;
+        }
+        return valid;
+    }
+    int getType(){
+        return type;
+    }
 }
 
 class LiteralExpr<T> extends Expr{
     T value;
-    public LiteralExpr(T v){
+    int type;
+    public LiteralExpr(T v, int t){
         this.value = v;
+        this.type = t;
         this.desc = unEscapeString("Literal: " + v);
     }
     void printTree(int depth){
@@ -109,9 +186,16 @@ class LiteralExpr<T> extends Expr{
     Node[] getChildren(){
         return null;
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // Nothing
+        return true;
+    }
+    int getType(){
+        return type;
+    }
 }
 
-class CallExpr extends Expr{
+class CallExpr extends Expr{// TODO Proper semantic analysis 
     //Expression wrapper for Call statement 
     String name;
     ExprList parameters;
@@ -128,13 +212,40 @@ class CallExpr extends Expr{
         Node[] children = {parameters};
         return children;
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){//TODO
+        // Check if function exists (Simpler, since no overloaded or nested functions)
+        // Check if it's being called with correct arguments
+        boolean valid = true;
+        return valid & parameters.semanticTest(curscope, curtable);
+    }
+    int getType(){//TODO
+        // Check return type for function
+        return sym.IDENTIFIER_INTEGER;
+    }
 }
 
 /*
     Statements
 */
 
-abstract class Stmnt extends Node{}
+abstract class Stmnt extends Node{
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // General semantic test, where all children of the current statement get tested.
+        Node[] children = getChildren();
+        if(children == null){
+            return true;
+        }else{
+            boolean valid = true;
+            for(Node n : children){
+                valid = valid && n.semanticTest(curscope, curtable);
+                if(!valid){
+                    break;
+                }
+            }
+            return valid;
+        }
+    }
+}
 
 class StmntList extends Node{
     Stmnt head;
@@ -163,6 +274,14 @@ class StmntList extends Node{
             children[0] = head;
             System.arraycopy(t, 0, children, 1, t.length);
             return children;
+        }
+    }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        boolean valid = head.semanticTest(curscope, curtable);
+        if(tail==null){
+            return valid;
+        }else{
+            return valid && tail.semanticTest(curscope, curtable);
         }
     }
 }
@@ -296,6 +415,13 @@ class Case extends Node{
     Node[] getChildren(){
         Node[] children = {mcase,list};
         return children;
+    }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        if(mcase==null){
+            return list.semanticTest(curscope, curtable);
+        }else{// Checking the literal expression shouldn't be necessary (returns constant true), but we do it anyways. 
+            return mcase.semanticTest(curscope, curtable) && list.semanticTest(curscope, curtable);
+        }
     }
 }
 
@@ -538,6 +664,10 @@ class VarList extends Node{
             return children;
         }
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // Variables in a function declaration are not required to be previously declared. No checking is done.
+        return true;
+    }
 }
 
 class ExprList extends Node{
@@ -569,10 +699,18 @@ class ExprList extends Node{
             return children;
         }
     }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        boolean valid = head.semanticTest(curscope, curtable);
+        if(tail==null){
+            return valid;
+        }else{
+            return valid && tail.semanticTest(curscope, curtable);
+        }
+    }
 }
 
 class CaseList extends Node{
-    Case head;//null means
+    Case head;//null means ???
     CaseList tail;
     public CaseList(Case h, CaseList t){
         this.head = h;
@@ -599,5 +737,85 @@ class CaseList extends Node{
             System.arraycopy(t, 0, children, 1, t.length);
             return children;
         }
+    }
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        boolean valid = head.semanticTest(curscope, curtable);
+        if(tail!=null){
+            return valid;
+        }else{
+            return valid && tail.semanticTest(curscope, curtable);
+        }
+    }
+}
+
+/*
+    Semantic Analysis Classes
+    TODO Maybe use custom error/exception classes
+*/
+
+class VarTable{// TODO Include functions
+    ArrayList<VarEntry> table;
+    public VarTable(){
+        table = new ArrayList<VarEntry>();
+    }
+    boolean addVariable(String identifier, int type, Scope varscope){
+        boolean added = false;
+        // Check if variable already exists first.
+        try{
+            getVariable(identifier, varscope); // Throws error if no variable exists within scope
+            System.out.println("Error Semantico: La variable " + identifier + "ya existe dentro de este ambito.");
+        }catch(Exception e){
+            table.add(new VarEntry(identifier, type, varscope));
+            added = true;
+        }
+        // Return if the variable was added
+        return added; 
+    }
+    int getVariable(String identifier, Scope curscope) throws Exception{//TODO Should optimize this for single loop.
+        // Find all variables with same identifier
+        ArrayList<VarEntry> matches = new ArrayList<VarEntry>();
+        for(VarEntry e : table){
+            if(e.identifier == identifier){
+                matches.add(e);
+            }
+        }
+        // If no matches were found, throw an exception
+        if(matches.isEmpty()){
+            throw new Exception();
+        }
+        // Within matching variables, find one with valid scope
+        VarEntry found = null;
+        for(VarEntry e : matches){
+            if(e.scope.containsScope(curscope)){
+                // No nested variables allowed, so no further validation required 
+                found = e;
+                break;
+            }
+        }
+        // If no suiting variable was found, throw an exception
+        if(found == null){
+            throw new Exception();
+        }
+        return found.type;
+    }
+    class VarEntry{
+        String identifier;
+        int type;
+        Scope scope;
+        public VarEntry(String identifier, int type, Scope varscope){
+            this.identifier = identifier;
+            this.type = type;
+            this.scope = varscope;
+        }
+    }
+}
+
+class Scope{//TODO
+    public Scope(){
+        
+    }
+    boolean containsScope(Scope s){
+        //todo: returns wether argument is contained within current scope
+        return true;
     }
 }
