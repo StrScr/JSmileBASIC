@@ -27,7 +27,7 @@ import java_cup.runtime.*;
         //System.out.print("<"+type+":"+yytext()+">");
         return new Symbol(type, yyline, yycolumn);
     }
-    
+
     /* Also creates a new java_cup.runtime.Symbol with information
        about the current token, but this object has a value. */
     private Symbol symbol(int type, Object value) {
