@@ -13,7 +13,7 @@ public abstract class Node{// TODO Keep line number and column
     abstract Node[] getChildren();
 
     abstract boolean semanticTest(Scope curscope, VarTable curtable);
-    
+
     void safePrint(Node n, int depth){
         if(n!=null){
             n.printTree(depth);
@@ -46,6 +46,83 @@ public abstract class Node{// TODO Keep line number and column
 */
 
 abstract class Expr extends Node{
+    enum SBType{
+        SB_INT,     SB_DOUBLE,      SB_STRING,
+        SB_INT_ARR, SB_DOUBLE_ARR,  SB_STRING_ARR,
+        SB_TYPE_ERROR
+    }
+    static SBType symToEnum(int symbol){
+        switch(symbol){
+            case sym.IDENTIFIER_INTEGER:{
+                return SBType.SB_INT;
+            }
+            case sym.IDENTIFIER_DECIMAL:{
+                return SBType.SB_DOUBLE;
+            }
+            case sym.IDENTIFIER_STRING:{
+                return SBType.SB_STRING;
+            }
+            default:{
+                return SBType.SB_TYPE_ERROR;
+            }
+        }
+    }
+    static SBType toArrayType(SBType simple){
+        switch(simple){
+            case SB_INT:{
+                return SBType.SB_INT_ARR;
+            }
+            case SB_DOUBLE:{
+                return SBType.SB_DOUBLE_ARR;
+            }
+            case SB_STRING:{
+                return SBType.SB_STRING_ARR;
+            }
+            default:{
+                return SBType.SB_TYPE_ERROR;
+            }
+        }
+    }
+    static SBType fromArrayType(SBType complex){
+        switch(complex){
+            case SB_INT_ARR:{
+                return SBType.SB_INT;
+            }
+            case SB_DOUBLE_ARR:{
+                return SBType.SB_DOUBLE;
+            }
+            case SB_STRING_ARR:{
+                return SBType.SB_STRING;
+            }
+            default:{
+                return SBType.SB_TYPE_ERROR;
+            }
+        }
+    }
+    static boolean areCompatibleTypes(SBType t1, SBType t2){
+        return resultingType(t1, t2) != SBType.SB_TYPE_ERROR;
+    }
+    static SBType resultingType(SBType t1, SBType t2){
+        // Check if they're both string
+        if(t1==SBType.SB_STRING && t2==SBType.SB_STRING){
+            return SBType.SB_STRING;
+        }
+        // Check if the first is numeric
+        if(t1==SBType.SB_INT || t1==SBType.SB_DOUBLE){
+            // If the first is numeric, the second should be, too
+            if(t2==SBType.SB_INT || t2==SBType.SB_DOUBLE){
+                // Resulting type should be biggest of both. AKA decimal if one of them is decimal
+                return (t1 == SBType.SB_DOUBLE || t2 == SBType.SB_DOUBLE) ? SBType.SB_DOUBLE : SBType.SB_INT;
+            }else{
+                return SBType.SB_TYPE_ERROR;
+            }
+        }
+        // Operations between arrays are not possible, so no further checks needed
+        return SBType.SB_TYPE_ERROR;
+    }
+    SBType getSBType(){
+        return symToEnum(getType());
+    }
     abstract int getType();
 }
 
@@ -86,13 +163,13 @@ class BinExpr extends Expr{
         }
         return valid && e1.semanticTest(curscope, curtable) && e2.semanticTest(curscope, curtable);
     }
-    int getType(){
+    int getType(){//TODO use native Expr function instead
         // Get resulting type from combination of both sides of expression
         // Check if both are numeric
         int t1 = e1.getType();
         int t2 = e2.getType();
         if((t1 == sym.IDENTIFIER_INTEGER || t1 == sym.IDENTIFIER_DECIMAL) && (t2 == sym.IDENTIFIER_INTEGER || t2 == sym.IDENTIFIER_DECIMAL)){
-            // Resulting type should be biggest of both sides. AKA decimal if one of them is decimal 
+            // Resulting type should be biggest of both sides. AKA decimal if one of them is decimal
             return (t1 == sym.IDENTIFIER_DECIMAL || t2 == sym.IDENTIFIER_DECIMAL) ? sym.IDENTIFIER_DECIMAL : sym.IDENTIFIER_INTEGER;
         }else{
             // Check if both are strings
@@ -103,7 +180,6 @@ class BinExpr extends Expr{
                 return sym.error;
             }
         }
-        return e.getType();
     }
 }
 
@@ -127,7 +203,7 @@ class UnExpr extends Expr{
         // Expression must be numeric
         int t = e.getType();
         boolean valid;
-        if(t == sym.IDENTIFIER_INTEGER || t == sym.IDENTIFIER_INTEGER){
+        if(t == sym.IDENTIFIER_INTEGER || t == sym.IDENTIFIER_DECIMAL){
             valid = true;
         }else{
             System.out.println("Error Semantico: Operaciones unarias solo aplican a tipos numericos.");
@@ -162,7 +238,7 @@ class IdExpr extends Expr{
             curtable.getVariable(name, curscope);
             valid = true;
         }catch(Exception e){
-            System.out.println("Error Semantico: La variable " + name + "no existe dentro de este ambito.");
+            System.out.println("Error Semantico: La variable " + name + " no existe dentro de este ambito.");
             valid = false;
         }
         return valid;
@@ -195,8 +271,8 @@ class LiteralExpr<T> extends Expr{
     }
 }
 
-class CallExpr extends Expr{// TODO Proper semantic analysis 
-    //Expression wrapper for Call statement 
+class CallExpr extends Expr{// TODO Proper semantic analysis
+    //Expression wrapper for Call statement
     String name;
     ExprList parameters;
     public CallExpr(String i, ExprList p){
@@ -334,6 +410,19 @@ class DecStmnt extends Stmnt{
         Node[] children = {id,arrSize,asig};
         return children;
     }
+    @Override
+    boolean semanticTest(Scope curscope, VarTable curtable){// TODO Handle arrays
+        // Add variable to table. Function validates everything else. Returns true if successful
+        boolean valid = curtable.addVariable(id.name, id.type, curscope);
+        // If declaration includes assignment, check assignment type compatibility
+        if(asig!=null){
+            if(!Expr.areCompatibleTypes(id.getSBType(), asig.getSBType())){
+                valid = false;
+                System.out.println("Error Semantico: Tipos incompatibles en inicialización de " + id.name + ".");
+            }
+        }
+        return valid;
+    }
 }
 
 class AssignStmnt extends Stmnt{
@@ -355,6 +444,22 @@ class AssignStmnt extends Stmnt{
     Node[] getChildren(){
         Node[] children = {id,arrPos,asig};
         return children;
+    }
+    @Override
+    boolean semanticTest(Scope curscope, VarTable curtable){
+        // Check if variable is declared
+        boolean valid = true;
+        try{
+            curtable.getVariable(id.name, curscope);
+        }catch(Exception e){
+            valid = false;
+            System.out.println("Error Semantico: La variable " + name + " no existe dentro de este ambito.");
+        }
+        // Check assignment type compatibility
+        if(!Expr.areCompatibleTypes(id.getSBType(), asig.getSBType())){
+            valid = false;
+            System.out.println("Error Semantico: Tipos incompatibles en asignación de " + id.name + ".");
+        }
     }
 }
 
@@ -419,7 +524,7 @@ class Case extends Node{
     boolean semanticTest(Scope curscope, VarTable curtable){
         if(mcase==null){
             return list.semanticTest(curscope, curtable);
-        }else{// Checking the literal expression shouldn't be necessary (returns constant true), but we do it anyways. 
+        }else{// Checking the literal expression shouldn't be necessary (returns constant true), but we do it anyways.
             return mcase.semanticTest(curscope, curtable) && list.semanticTest(curscope, curtable);
         }
     }
@@ -753,7 +858,7 @@ class CaseList extends Node{
     TODO Maybe use custom error/exception classes
 */
 
-class VarTable{// TODO Include functions
+class VarTable{// TODO Include functions and array types
     ArrayList<VarEntry> table;
     public VarTable(){
         table = new ArrayList<VarEntry>();
@@ -769,7 +874,7 @@ class VarTable{// TODO Include functions
             added = true;
         }
         // Return if the variable was added
-        return added; 
+        return added;
     }
     int getVariable(String identifier, Scope curscope) throws Exception{//TODO Should optimize this for single loop.
         // Find all variables with same identifier
@@ -787,7 +892,7 @@ class VarTable{// TODO Include functions
         VarEntry found = null;
         for(VarEntry e : matches){
             if(e.scope.containsScope(curscope)){
-                // No nested variables allowed, so no further validation required 
+                // No nested variables allowed, so no further validation required
                 found = e;
                 break;
             }
@@ -811,11 +916,33 @@ class VarTable{// TODO Include functions
 }
 
 class Scope{//TODO
-    public Scope(){
-        
+    Scope up;
+    ArrayList<Scope> down;
+    int mynum;
+    int lastdown;
+    int curoffset;
+    public Scope(Scope parent, int num, int offset){
+        this.up = parent;
+        this.down = new ArrayList<Scope>();
+        this.mynum = num;
+        this.lastdown = -1;
+        this.curoffset = offset;
+    }
+    Scope levelUp(){
+        //TODO
+    }
+    Scope levelDown(){
+        //TODO
     }
     boolean containsScope(Scope s){
-        //todo: returns wether argument is contained within current scope
+        //TODO returns wether argument is contained within current scope
         return true;
+    }
+    String getTotalScope(){
+        if(up==null){
+            return "G"; // Global Scope
+        }else{
+            return up.getTotalScope() + "." + mynum;
+        }
     }
 }
