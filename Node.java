@@ -20,6 +20,10 @@ public abstract class Node {
 
     abstract boolean semanticTest(Scope curscope, VarTable curtable);
 
+    void semanticError(String message){
+        System.out.println("Error Semántico: Ln " + line + ", Col " + col + ": " + message);
+    }
+
     void safePrint(Node n, int depth) {
         if (n != null) {
             n.printTree(depth);
@@ -176,13 +180,12 @@ class BinExpr extends Expr {
         int t = getType();
         if (t == sym.error) {
             valid = false;
-            System.out.println("Error Semantico: Expresiones son de tipos incompatibles.");// NOTE Could print many
-                                                                                           // times in long expressions
+            semanticError("Expresiones son de tipos incompatibles.");// NOTE Could print many times in long expressions
         } else {
             // If resulting type is string, only concatenation is available
             if (t == sym.IDENTIFIER_STRING && op != sym.PLUS) {
                 valid = false;
-                System.out.println("Error Semantico: Expresion entre cadenas solo puede ser concatenacion (+).");
+                semanticError("Expresion entre cadenas solo puede ser concatenacion (+).");
             } else {
                 // Expression is string concatenation OR numeric (should be compatible for all
                 // operations).
@@ -243,7 +246,7 @@ class UnExpr extends Expr {
         if (t == sym.IDENTIFIER_INTEGER || t == sym.IDENTIFIER_DECIMAL) {
             valid = true;
         } else {
-            System.out.println("Error Semantico: Operaciones unarias solo aplican a tipos numericos.");
+            semanticError("Operaciones unarias solo aplican a tipos numericos.");
             valid = false;
         }
         return valid && e.semanticTest(curscope, curtable);
@@ -281,7 +284,7 @@ class IdExpr extends Expr {
             curtable.getVariable(name, curscope);
             valid = true;
         } catch (Exception e) {
-            System.out.println("Error Semantico: La variable " + name + " no existe dentro de este ambito.");
+            semanticError("La variable " + name + " no existe dentro de este ambito.");
             valid = false;
         }
         return valid;
@@ -491,14 +494,17 @@ class DecStmnt extends Stmnt {
 
     @Override
     boolean semanticTest(Scope curscope, VarTable curtable) {// TODO Handle arrays
-        // Add variable to table. Function validates everything else. Returns true if
-        // successful
+        // Add variable to table. Function validates everything else.
+        // Returns true if successful
         boolean valid = curtable.addVariable(id.name, id.type, curscope);
+        if(!valid){
+            semanticError("La variable " + id.name + "ya existe dentro de este ambito.");
+        }
         // If declaration includes assignment, check assignment type compatibility
         if (asig != null) {
             if (!Expr.areCompatibleTypes(id.getSBType(), asig.getSBType())) {
                 valid = false;
-                System.out.println("Error Semantico: Tipos incompatibles en inicialización de " + id.name + ".");
+                semanticError("Tipos incompatibles en inicialización de " + id.name + ".");
             }
         }
         return valid;
@@ -538,12 +544,12 @@ class AssignStmnt extends Stmnt {
             curtable.getVariable(id.name, curscope);
         } catch (Exception e) {
             valid = false;
-            System.out.println("Error Semantico: La variable " + name + " no existe dentro de este ambito.");
+            semanticError("La variable " + name + " no existe dentro de este ambito.");
         }
         // Check assignment type compatibility
         if (!Expr.areCompatibleTypes(id.getSBType(), asig.getSBType())) {
             valid = false;
-            System.out.println("Error Semantico: Tipos incompatibles en asignación de " + id.name + ".");
+            semanticError("Tipos incompatibles en asignación de " + id.name + ".");
         }
     }
 }
@@ -1025,7 +1031,6 @@ class VarTable {// TODO Include functions and array types
         // Check if variable already exists first.
         try {
             getVariable(identifier, varscope); // Throws error if no variable exists within scope
-            System.out.println("Error Semantico: La variable " + identifier + "ya existe dentro de este ambito.");
         } catch (Exception e) {
             table.add(new VarEntry(identifier, type, varscope));
             added = true;
