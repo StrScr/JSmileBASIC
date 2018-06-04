@@ -180,16 +180,16 @@ start with program;
 program     ::= ex_stmnt_list:l     {:AbstractTree = l;:}
             ;
 
-stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s,l);:}
+stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s.line,s.col,s,l);:}
             |   sep stmnt_list:l            {:RESULT = l;:}
-            |   stmnt:s sep                 {:RESULT = new StmntList(s,null);:}
+            |   stmnt:s sep                 {:RESULT = new StmntList(s.line,s.col,s,null);:}
             |   error sep
             ;
-ex_stmnt_list   ::= stmnt:s sep ex_stmnt_list:l {:RESULT = new StmntList(s,l);:}
-                |   END sep ex_stmnt_list:l     {:RESULT = new StmntList(new SimpleStmnt(sym.END),l);:}
+ex_stmnt_list   ::= stmnt:s sep ex_stmnt_list:l {:RESULT = new StmntList(s.line,s.col,s,l);:}
+                |   END:s sep ex_stmnt_list:l   {:RESULT = new StmntList(sleft,sright,new SimpleStmnt(sleft,sright,sym.END),l);:}
                 |   sep ex_stmnt_list:l         {:RESULT = l;:}
-                |   stmnt:s sep                 {:RESULT = new StmntList(s,null);:}
-                |   END sep                     {:RESULT = new StmntList(new SimpleStmnt(sym.END),null);:}
+                |   stmnt:s sep                 {:RESULT = new StmntList(s.line,s.col,s,null);:}
+                |   END:s sep                   {:RESULT = new StmntList(sleft,sright,new SimpleStmnt(sleft,sright,sym.END),null);:}
                 ;
 stmnt       ::= declaration:s       {:RESULT = s;:}
             |   asig:s              {:RESULT = s;:}
@@ -204,44 +204,44 @@ stmnt       ::= declaration:s       {:RESULT = s;:}
             |   call_stmnt:s        {:RESULT = s;:}
             |   func_call:s         {:RESULT = s;:}
             |   return_stmnt:s      {:RESULT = s;:}
-            |   LABEL:l             {:RESULT = new LabelStmnt(l);:}
-            |   BREAK               {:RESULT = new SimpleStmnt(sym.BREAK);:}
-            |   CONTINUE            {:RESULT = new SimpleStmnt(sym.CONTINUE);:}
+            |   LABEL:s             {:RESULT = new LabelStmnt(sleft,sright,s);:}
+            |   BREAK:s             {:RESULT = new SimpleStmnt(sleft,sright,sym.BREAK);:}
+            |   CONTINUE:s          {:RESULT = new SimpleStmnt(sleft,sright,sym.CONTINUE);:}
             ;
 sep         ::= LINEEND
             |   COLON
             ;
 
 //Statements
-declaration ::= VAR id:i                        {:RESULT = new DecStmnt(i,null,null);:}
-            |   DIM id:i                        {:RESULT = new DecStmnt(i,null,null);:}
-            |   VAR id:i LBRACK expr:e RBRACK   {:RESULT = new DecStmnt(i,e,null);:}
-            |   DIM id:i LBRACK expr:e RBRACK   {:RESULT = new DecStmnt(i,e,null);:}
-            |   VAR asig:a                      {:RESULT = new DecStmnt(((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
-            |   DIM asig:a                      {:RESULT = new DecStmnt(((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
+declaration ::= VAR:s id:i                          {:RESULT = new DecStmnt(sleft,sright,i,null,null);:}
+            |   DIM:s id:i                          {:RESULT = new DecStmnt(sleft,sright,i,null,null);:}
+            |   VAR:s id:i LBRACK expr:e RBRACK     {:RESULT = new DecStmnt(sleft,sright,i,e,null);:}
+            |   DIM:s id:i LBRACK expr:e RBRACK     {:RESULT = new DecStmnt(sleft,sright,i,e,null);:}
+            |   VAR:s asig:a                        {:RESULT = new DecStmnt(sleft,sright,((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
+            |   DIM:s asig:a                        {:RESULT = new DecStmnt(sleft,sright,((AssignStmnt)a).id,((AssignStmnt)a).arrPos,((AssignStmnt)a).asig);:}
             ;//TODO: multiple declarations in one line, check if array/var/asig mix is possible
 
-asig        ::= id:i EQ expr:e                      {:RESULT = new AssignStmnt(i,null,e);:}
-            |   id:i LBRACK expr:p RBRACK EQ expr:e {:RESULT = new AssignStmnt(i,p,e);:}
+asig        ::= id:i EQ expr:e                      {:RESULT = new AssignStmnt(i.line,i.col,i,null,e);:}
+            |   id:i LBRACK expr:p RBRACK EQ expr:e {:RESULT = new AssignStmnt(i.line,i.col,i,p,e);:}
             ;
 
 conditional ::= if_stmnt:s  {:RESULT = s;:}
             |   on_stmnt:s  {:RESULT = s;:}
             ;
-if_stmnt    ::= IF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new IfStmnt(e,l,f);:}
+if_stmnt    ::= IF:s expr:e THEN ex_stmnt_list:l if_2:f     {:RESULT = new IfStmnt(sleft,sright,e,l,f);:}
             ;
-if_2        ::= ELSEIF expr:e THEN ex_stmnt_list:l if_2:f   {:RESULT = new StmntList(new IfStmnt(e,l,f),null);:}
+if_2        ::= ELSEIF:s expr:e THEN ex_stmnt_list:l if_2:f {:RESULT = new StmntList(sleft,sright,new IfStmnt(sleft,sright,e,l,f),null);:}
             |   ELSE ex_stmnt_list:l ENDIF                  {:RESULT = l;:}
             |   ENDIF                                       {:RESULT = null;:}
             |   error THEN
             |   error ENDIF
             ;
-on_stmnt    ::= ON expr:e sep case_list:l WON   {:RESULT = new OnStmnt(e,l);:}
+on_stmnt    ::= ON:s expr:e sep case_list:l WON     {:RESULT = new OnStmnt(sleft,sright,e,l);:}
             ;
-case_list   ::= CASE literal:e sep ex_stmnt_list:l case_list:c  {:RESULT = new CaseList(new Case(e,l),c);:}
-            |   DEFAULT sep ex_stmnt_list:l case_list:c         {:RESULT = new CaseList(new Case(null,l),c);:}
-            |   CASE literal:e sep ex_stmnt_list:l              {:RESULT = new CaseList(new Case(e,l),null);:}
-            |   DEFAULT sep ex_stmnt_list:l                     {:RESULT = new CaseList(new Case(null,l),null);:}
+case_list   ::= CASE:s literal:e sep ex_stmnt_list:l case_list:c    {:RESULT = new CaseList(sleft,sright,new Case(sleft,sright,e,l),c);:}
+            |   DEFAULT:s sep ex_stmnt_list:l case_list:c           {:RESULT = new CaseList(sleft,sright,new Case(sleft,sright,null,l),c);:}
+            |   CASE:s literal:e sep ex_stmnt_list:l                {:RESULT = new CaseList(sleft,sright,new Case(sleft,sright,e,l),null);:}
+            |   DEFAULT:s sep ex_stmnt_list:l                       {:RESULT = new CaseList(sleft,sright,new Case(sleft,sright,null,l),null);:}
             |   error sep
             ;
 
@@ -249,19 +249,19 @@ loop        ::= for_stmnt:s     {:RESULT = s;:}
             |   while_stmnt:s   {:RESULT = s;:}
             |   repeat_stmnt:s  {:RESULT = s;:}
             ;
-for_stmnt   ::= FOR id:i EQ numeric:n TO numeric:m sep ex_stmnt_list:l NEXT                 {:RESULT = new ForStmnt(i,n,m,new LiteralExpr<Integer>(new Integer(1),sym.IDENTIFIER_INTEGER),l);:}
-            |   FOR id:i EQ numeric:n TO numeric:m STEP numeric:s sep ex_stmnt_list:l NEXT  {:RESULT = new ForStmnt(i,n,m,s,l);:}
+for_stmnt   ::= FOR:ss id:i EQ numeric:n TO numeric:m sep ex_stmnt_list:l NEXT                  {:RESULT = new ForStmnt(ssleft,ssright,i,n,m,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),l);:}
+            |   FOR:ss id:i EQ numeric:n TO numeric:m STEP numeric:s sep ex_stmnt_list:l NEXT   {:RESULT = new ForStmnt(ssleft,ssright,i,n,m,s,l);:}
             ;//TODO: Check if any expr possible (strings). Check if asig obligatory
-while_stmnt ::= WHILE expr:e sep ex_stmnt_list:l WEND   {:RESULT = new WhileStmnt(e,l);:}
+while_stmnt ::= WHILE:s expr:e sep ex_stmnt_list:l WEND     {:RESULT = new WhileStmnt(sleft,sright,e,l);:}
             ;
-repeat_stmnt::= REPEAT sep ex_stmnt_list:l UNTIL expr:e {:RESULT = new RepeatStmnt(e,l);:}
-            ;
-
-goto_stmnt  ::= GOTO LABEL:l    {:RESULT = new GotoStmnt(l,false);:}
-            |   GOSUB LABEL:l   {:RESULT = new GotoStmnt(l,true);:}
+repeat_stmnt::= REPEAT:s sep ex_stmnt_list:l UNTIL expr:e   {:RESULT = new RepeatStmnt(sleft,sright,e,l);:}
             ;
 
-def_stmnt   ::= DEF id:i def_params:p stmnt_list:l END  {:RESULT = new DefStmnt(i.name,p.args,p.ret,l);:}
+goto_stmnt  ::= GOTO:s LABEL:l      {:RESULT = new GotoStmnt(sleft,sright,l,false);:}
+            |   GOSUB:s LABEL:l     {:RESULT = new GotoStmnt(sleft,sright,l,true);:}
+            ;
+
+def_stmnt   ::= DEF:s id:i def_params:p stmnt_list:l END  {:RESULT = new DefStmnt(sleft,sright,i.name,p.args,p.ret,l);:}
             ;
 def_params  ::= LPAREN var_list:l RPAREN sep    {:RESULT = new DefParam(l,null);:}
             |   LPAREN RPAREN sep               {:RESULT = new DefParam(null,null);:}
@@ -271,17 +271,17 @@ def_params  ::= LPAREN var_list:l RPAREN sep    {:RESULT = new DefParam(l,null);
             |   error RPAREN
             |   error sep
             ;
-return_stmnt::= RETURN expr:e   {:RESULT = new RetStmnt(e);:}
-            |   RETURN          {:RESULT = new RetStmnt(null);:}
+return_stmnt::= RETURN:s expr:e     {:RESULT = new RetStmnt(sleft,sright,e);:}
+            |   RETURN:s            {:RESULT = new RetStmnt(sleft,sright,null);:}
             ;
 
-call_stmnt  ::= CALL STRING:s                                   {:RESULT = new CallStmnt(s,null,null);:}
-            |   CALL STRING:s COMMA expr_list:p                 {:RESULT = new CallStmnt(s,p,null);:}
-            |   CALL STRING:s OUT var_list:r                    {:RESULT = new CallStmnt(s,null,r);:}
-            |   CALL STRING:s COMMA expr_list:p OUT var_list:r  {:RESULT = new CallStmnt(s,p,r);:}
+call_stmnt  ::= CALL:ss STRING:s                                    {:RESULT = new CallStmnt(ssleft,ssright,s,null,null);:}
+            |   CALL:ss STRING:s COMMA expr_list:p                  {:RESULT = new CallStmnt(ssleft,ssright,s,p,null);:}
+            |   CALL:ss STRING:s OUT var_list:r                     {:RESULT = new CallStmnt(ssleft,ssright,s,null,r);:}
+            |   CALL:ss STRING:s COMMA expr_list:p OUT var_list:r   {:RESULT = new CallStmnt(ssleft,ssright,s,p,r);:}
             ;
-ret_call_stmnt  ::= CALL LPAREN STRING:s RPAREN                     {:RESULT = new CallStmnt(s,null,null);:}
-                |   CALL LPAREN STRING:s COMMA expr_list:l RPAREN   {:RESULT = new CallStmnt(s,l,null);:}
+ret_call_stmnt  ::= CALL:ss LPAREN STRING:s RPAREN                      {:RESULT = new CallStmnt(ssleft,ssright,s,null,null);:}
+                |   CALL:ss LPAREN STRING:s COMMA expr_list:l RPAREN    {:RESULT = new CallStmnt(ssleft,ssright,s,l,null);:}
                 |   error COMMA
                 |   error sep
                 ;
@@ -290,66 +290,66 @@ func_call   ::= simp_func_call:s    {:RESULT = s;:}
             |   multi_func_call:s   {:RESULT = s;:}
             |   method_call:s       {:RESULT = s;:}
             ;
-simp_func_call  ::= id:i LPAREN expr:e COMMA expr_list:l RPAREN {:RESULT = new CallStmnt(i.name,new ExprList(e,l),null);:}
-                |   id:i LPAREN expr:e RPAREN                   {:RESULT = new CallStmnt(i.name,new ExprList(e,null),null);:}
-                |   id:i LPAREN RPAREN                          {:RESULT = new CallStmnt(i.name,null,null);:}
+simp_func_call  ::= id:i LPAREN expr:e COMMA expr_list:l RPAREN {:RESULT = new CallStmnt(i.line,i.col,i.name,new ExprList(e,l),null);:}
+                |   id:i LPAREN expr:e RPAREN                   {:RESULT = new CallStmnt(i.line,i.col,i.name,new ExprList(e,null),null);:}
+                |   id:i LPAREN RPAREN                          {:RESULT = new CallStmnt(i.line,i.col,i.name,null,null);:}
                 ;//I have no idea why LPAREN expr_list RPAREN doesn't work, but this does.
-multi_func_call ::= id:i expr_list:p OUT var_list:r {:RESULT = new CallStmnt(i.name,p,r);:}
-                |   id:i OUT var_list:r             {:RESULT = new CallStmnt(i.name,null,r);:}
+multi_func_call ::= id:i expr_list:p OUT var_list:r {:RESULT = new CallStmnt(i.line,i.col,i.name,p,r);:}
+                |   id:i OUT var_list:r             {:RESULT = new CallStmnt(i.line,i.col,i.name,null,r);:}
                 ;
-method_call ::= id:i    {:RESULT = new CallStmnt(i.name, null, null);:}
+method_call ::= id:i    {:RESULT = new CallStmnt(i.line,i.col,i.name, null, null);:}
             ;//Hopefully won't cause trouble
 
-var_list    ::= id:i COMMA var_list:l   {:RESULT = new VarList(i,l);:}
-            |   id:i                    {:RESULT = new VarList(i,null);:}
+var_list    ::= id:i COMMA var_list:l   {:RESULT = new VarList(i.line,i.col,i,l);:}
+            |   id:i                    {:RESULT = new VarList(i.line,i.col,i,null);:}
             | error COMMA
             | error sep
             ;
 
-expr_list   ::= expr:e COMMA expr_list:l    {:RESULT = new ExprList(e,l);:}
-            |   expr:e                      {:RESULT = new ExprList(e,null);:}
+expr_list   ::= expr:e COMMA expr_list:l    {:RESULT = new ExprList(e.line,e.col,e,l);:}
+            |   expr:e                      {:RESULT = new ExprList(e.line,e.col,e,null);:}
             ;
 
-increment_stmnt ::= INC id:i                {:RESULT = new AssignStmnt(i,null,new BinExpr(i,new LiteralExpr<Integer>(new Integer(1),sym.IDENTIFIER_INTEGER),sym.PLUS));:}
-                |   INC id:i COMMA expr:e   {:RESULT = new AssignStmnt(i,null,new BinExpr(i,e,sym.PLUS));:}
-                |   DEC id:i                {:RESULT = new AssignStmnt(i,null,new BinExpr(i,new LiteralExpr<Integer>(new Integer(1),sym.IDENTIFIER_INTEGER),sym.MINUS));:}
-                |   DEC id:i COMMA expr:e   {:RESULT = new AssignStmnt(i,null,new BinExpr(i,e,sym.MINUS));:}
+increment_stmnt ::= INC:s id:i              {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),sym.PLUS));:}
+                |   INC:s id:i COMMA expr:e {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,e,sym.PLUS));:}
+                |   DEC:s id:i              {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),sym.MINUS));:}
+                |   DEC:s id:i COMMA expr:e {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,e,sym.MINUS));:}
                 ;
 
-swap_stmnt  ::= SWAP id:i1 COMMA id:i2    {:RESULT = new SwapStmnt(i1, i2);:}
+swap_stmnt  ::= SWAP:s id:i1 COMMA id:i2    {:RESULT = new SwapStmnt(sleft,sright,i1, i2);:}
             ;
 
-print_stmnt ::= PRINT print_list:l      {:RESULT = new PrintStmnt(l);:}
-            |   QUESTION print_list:l   {:RESULT = new PrintStmnt(l);:}
+print_stmnt ::= PRINT:s print_list:l        {:RESULT = new PrintStmnt(sleft,sright,l);:}
+            |   QUESTION:s print_list:l     {:RESULT = new PrintStmnt(sleft,sright,l);:}
             ;
-print_list  ::= expr:e COMMA print_list:l       {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>("  ",sym.IDENTIFIER_STRING),l));:}
-            |   expr:e SEMICOLON print_list:l   {:RESULT = new ExprList(e,l);:}
-            |   expr:e                          {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>("\n",sym.IDENTIFIER_STRING),null));:}
-            |   COMMA                           {:RESULT = new ExprList(new LiteralExpr<String>("  \n",sym.IDENTIFIER_STRING),null);:}
+print_list  ::= expr:e COMMA:s print_list:l     {:RESULT = new ExprList(e.line,e.col,e,new ExprList(sleft,sright,new LiteralExpr<String>(-1,-1,"  ",sym.IDENTIFIER_STRING),l));:}
+            |   expr:e SEMICOLON print_list:l   {:RESULT = new ExprList(e.line,e.col,e,l);:}
+            |   expr:e                          {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>(-1,-1,"\n",sym.IDENTIFIER_STRING),null));:}
+            |   COMMA:s                         {:RESULT = new ExprList(sleft,sright,new LiteralExpr<String>(-1,-1,"  \n",sym.IDENTIFIER_STRING),null);:}
             |   SEMICOLON                       {:RESULT = null;:}
             |   error SEMICOLON
             ;
 
-input_stmnt ::= INPUT STRING:s SEMICOLON var_list:l             {:RESULT = new InputStmnt(s+"?",l);:}
-            |   INPUT STRING:s COMMA var_list:l                 {:RESULT = new InputStmnt(s,l);:}
-            |   INPUT var_list:l                                {:RESULT = new InputStmnt("",l);:}
-            |   LINPUT STRING:s SEMICOLON IDENTIFIER_STRING:i   {:RESULT = new InputStmnt(s,new VarList(new IdExpr(sym.IDENTIFIER_STRING,i),null));:}
+input_stmnt ::= INPUT:ss STRING:s SEMICOLON var_list:l             {:RESULT = new InputStmnt(ssleft,ssright,s+"?",l);:}
+            |   INPUT:ss STRING:s COMMA var_list:l                 {:RESULT = new InputStmnt(ssleft,ssright,s,l);:}
+            |   INPUT:ss var_list:l                                {:RESULT = new InputStmnt(ssleft,ssright,"",l);:}
+            |   LINPUT:ss STRING:s SEMICOLON IDENTIFIER_STRING:i   {:RESULT = new InputStmnt(ssleft,ssright,s,new VarList(ileft,iright,new IdExpr(ileft,iright,sym.IDENTIFIER_STRING,i),null));:}
             ;
 
 //Expressions
-expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.intValue());:}
-        |   expr:e1 bin_bit_op:o expr:e2        {:RESULT = new BinExpr(e1,e2,o.intValue());:}
-        |   expr:e1 bin_relation_op:o expr:e2   {:RESULT = new BinExpr(e1,e2,o.intValue());:}
-        |   expr:e1 bit_shift:o expr:e2         {:RESULT = new BinExpr(e1,e2,o.intValue());:}
-        |   expr:e1 math_op_sum:o expr:e2       {:RESULT = new BinExpr(e1,e2,o.intValue());:}
-        |   expr:e1 math_op_mult:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.intValue());:}
-        |   unary_op:o expr:e                   {:RESULT = new UnExpr(e,o.intValue());:}
+expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1.line,e1.col,e1,e2,o.intValue());:}
+        |   expr:e1 bin_bit_op:o expr:e2        {:RESULT = new BinExpr(e1.line,e1.col,e1,e2,o.intValue());:}
+        |   expr:e1 bin_relation_op:o expr:e2   {:RESULT = new BinExpr(e1.line,e1.col,e1,e2,o.intValue());:}
+        |   expr:e1 bit_shift:o expr:e2         {:RESULT = new BinExpr(e1.line,e1.col,e1,e2,o.intValue());:}
+        |   expr:e1 math_op_sum:o expr:e2       {:RESULT = new BinExpr(e1.line,e1.col,e1,e2,o.intValue());:}
+        |   expr:e1 math_op_mult:o expr:e2      {:RESULT = new BinExpr(e1.line,e1.col,e1,e2,o.intValue());:}
+        |   unary_op:o expr:e                   {:RESULT = new UnExpr(e.line,e.col,e,o.intValue());/*TODO The op's pos is lost :/ Using expr pos*/:}
         |   LPAREN expr:e RPAREN                {:RESULT = e;:}
         |   literal:e                           {:RESULT = e;:}
         |   id:e                                {:RESULT = e;:}
         |   id:e LBRACK expr:p RBRACK           {:RESULT = e;:}
-        |   simp_func_call:s                    {:RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);:}
-        |   ret_call_stmnt:s                    {:RESULT = new CallExpr(((CallStmnt)s).name,((CallStmnt)s).parameters);:}
+        |   simp_func_call:s                    {:RESULT = new CallExpr(s.line,s.col,((CallStmnt)s).name,((CallStmnt)s).parameters);:}
+        |   ret_call_stmnt:s                    {:RESULT = new CallExpr(s.line,s.col,((CallStmnt)s).name,((CallStmnt)s).parameters);:}
         |   error bin_logic_op
         |   error bin_bit_op
         |   error bin_relation_op
@@ -360,7 +360,7 @@ expr    ::= expr:e1 bin_logic_op:o expr:e2      {:RESULT = new BinExpr(e1,e2,o.i
         |   error RPAREN
         |   error LBRACK
         |   error RBRACK
-        ;//TODO
+        ;
 
 //Expression Terminal Groups
 unary_op        ::= MINUS               {:RESULT = new Integer(sym.MINUS);:}
@@ -393,20 +393,20 @@ bin_bit_op      ::= BIT_AND {:RESULT = new Integer(sym.BIT_AND);:}
 bin_logic_op    ::= ANDAND  {:RESULT = new Integer(sym.ANDAND);:}
                 |   OROR    {:RESULT = new Integer(sym.OROR);:}
                 ;
-literal     ::= NUMBER:n    {:RESULT = new LiteralExpr<Integer>(Integer.parseInt(n),sym.IDENTIFIER_INTEGER);:}
-            |   DECIMAL:n   {:RESULT = new LiteralExpr<Double>(Double.parseDouble(n),sym.IDENTIFIER_DECIMAL);:}
-            |   STRING:n    {:RESULT = new LiteralExpr<String>(n,sym.IDENTIFIER_STRING);:}
-            |   TRUE        {:RESULT = new LiteralExpr<Integer>(new Integer(1),sym.IDENTIFIER_INTEGER);:}
-            |   FALSE       {:RESULT = new LiteralExpr<Integer>(new Integer(0),sym.IDENTIFIER_INTEGER);:}
+literal     ::= NUMBER:n    {:RESULT = new LiteralExpr<Integer>(nleft,nright,Integer.parseInt(n),sym.IDENTIFIER_INTEGER);:}
+            |   DECIMAL:n   {:RESULT = new LiteralExpr<Double>(nleft,nright,Double.parseDouble(n),sym.IDENTIFIER_DECIMAL);:}
+            |   STRING:n    {:RESULT = new LiteralExpr<String>(nleft,nright,n,sym.IDENTIFIER_STRING);:}
+            |   TRUE:s      {:RESULT = new LiteralExpr<Integer>(sleft,sright,new Integer(1),sym.IDENTIFIER_INTEGER);:}
+            |   FALSE:s     {:RESULT = new LiteralExpr<Integer>(sleft,sright,new Integer(0),sym.IDENTIFIER_INTEGER);:}
             ;
-numeric     ::= IDENTIFIER_INTEGER:i    {:RESULT = new IdExpr(sym.IDENTIFIER_INTEGER, i);:}
-            |   IDENTIFIER_DECIMAL:i    {:RESULT = new IdExpr(sym.IDENTIFIER_DECIMAL, i);:}
-            |   NUMBER:n                {:RESULT = new LiteralExpr<Integer>(Integer.parseInt(n),sym.IDENTIFIER_INTEGER);:}
-            |   DECIMAL:n               {:RESULT = new LiteralExpr<Double>(Double.parseDouble(n),sym.IDENTIFIER_DECIMAL);:}
-            |   TRUE                    {:RESULT = new LiteralExpr<Integer>(new Integer(1),sym.IDENTIFIER_INTEGER);:}
-            |   FALSE                   {:RESULT = new LiteralExpr<Integer>(new Integer(0),sym.IDENTIFIER_INTEGER);:}
+numeric     ::= IDENTIFIER_INTEGER:i    {:RESULT = new IdExpr(ileft,iright,sym.IDENTIFIER_INTEGER, i);:}
+            |   IDENTIFIER_DECIMAL:i    {:RESULT = new IdExpr(ileft,iright,sym.IDENTIFIER_DECIMAL, i);:}
+            |   NUMBER:n                {:RESULT = new LiteralExpr<Integer>(nleft,nright,Integer.parseInt(n),sym.IDENTIFIER_INTEGER);:}
+            |   DECIMAL:n               {:RESULT = new LiteralExpr<Double>(nleft,nright,Double.parseDouble(n),sym.IDENTIFIER_DECIMAL);:}
+            |   TRUE:s                  {:RESULT = new LiteralExpr<Integer>(sleft,sright,new Integer(1),sym.IDENTIFIER_INTEGER);:}
+            |   FALSE:s                 {:RESULT = new LiteralExpr<Integer>(sleft,sright,new Integer(0),sym.IDENTIFIER_INTEGER);:}
             ;
-id          ::= IDENTIFIER_INTEGER:i    {:RESULT = new IdExpr(sym.IDENTIFIER_INTEGER, i);:}
-            |   IDENTIFIER_DECIMAL:i    {:RESULT = new IdExpr(sym.IDENTIFIER_DECIMAL, i);:}
-            |   IDENTIFIER_STRING:i     {:RESULT = new IdExpr(sym.IDENTIFIER_STRING, i);:}
+id          ::= IDENTIFIER_INTEGER:i    {:RESULT = new IdExpr(ileft,iright,sym.IDENTIFIER_INTEGER, i);:}
+            |   IDENTIFIER_DECIMAL:i    {:RESULT = new IdExpr(ileft,iright,sym.IDENTIFIER_DECIMAL, i);:}
+            |   IDENTIFIER_STRING:i     {:RESULT = new IdExpr(ileft,iright,sym.IDENTIFIER_STRING, i);:}
             ;
