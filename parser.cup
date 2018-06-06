@@ -176,8 +176,8 @@ precedence left UMINUS, NOT, BIT_NOT;
 
 start with program;
 
-/* program     ::= ex_stmnt_list:l     {:l.printTree(0);BuildAstAsDot(l);l.semanticTest(new Scope(),new VarTable());:}*/
-program     ::= ex_stmnt_list:l     {:AbstractTree = l;:}
+/* program     ::= ex_stmnt_list:l     {:AbstractTree = l;:} */
+program     ::= ex_stmnt_list:l     {:BuildAstAsDot(l);l.semanticTest(new Scope(),new VarTable());:}
             ;
 
 stmnt_list  ::= stmnt:s sep stmnt_list:l    {:RESULT = new StmntList(s.line,s.col,s,l);:}
@@ -290,8 +290,8 @@ func_call   ::= simp_func_call:s    {:RESULT = s;:}
             |   multi_func_call:s   {:RESULT = s;:}
             |   method_call:s       {:RESULT = s;:}
             ;
-simp_func_call  ::= id:i LPAREN expr:e COMMA expr_list:l RPAREN {:RESULT = new CallStmnt(i.line,i.col,i.name,new ExprList(e,l),null);:}
-                |   id:i LPAREN expr:e RPAREN                   {:RESULT = new CallStmnt(i.line,i.col,i.name,new ExprList(e,null),null);:}
+simp_func_call  ::= id:i LPAREN expr:e COMMA expr_list:l RPAREN {:RESULT = new CallStmnt(i.line,i.col,i.name,new ExprList(e.line,e.col,e,l),null);:}
+                |   id:i LPAREN expr:e RPAREN                   {:RESULT = new CallStmnt(i.line,i.col,i.name,new ExprList(e.line,e.col,e,null),null);:}
                 |   id:i LPAREN RPAREN                          {:RESULT = new CallStmnt(i.line,i.col,i.name,null,null);:}
                 ;//I have no idea why LPAREN expr_list RPAREN doesn't work, but this does.
 multi_func_call ::= id:i expr_list:p OUT var_list:r {:RESULT = new CallStmnt(i.line,i.col,i.name,p,r);:}
@@ -310,10 +310,10 @@ expr_list   ::= expr:e COMMA expr_list:l    {:RESULT = new ExprList(e.line,e.col
             |   expr:e                      {:RESULT = new ExprList(e.line,e.col,e,null);:}
             ;
 
-increment_stmnt ::= INC:s id:i              {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),sym.PLUS));:}
-                |   INC:s id:i COMMA expr:e {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,e,sym.PLUS));:}
-                |   DEC:s id:i              {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),sym.MINUS));:}
-                |   DEC:s id:i COMMA expr:e {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,is,e,sym.MINUS));:}
+increment_stmnt ::= INC:s id:i              {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,i,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),sym.PLUS));:}
+                |   INC:s id:i COMMA expr:e {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,i,e,sym.PLUS));:}
+                |   DEC:s id:i              {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,i,new LiteralExpr<Integer>(-1,-1,new Integer(1),sym.IDENTIFIER_INTEGER),sym.MINUS));:}
+                |   DEC:s id:i COMMA expr:e {:RESULT = new AssignStmnt(sleft,sright,i,null,new BinExpr(i.line,i.col,i,e,sym.MINUS));:}
                 ;
 
 swap_stmnt  ::= SWAP:s id:i1 COMMA id:i2    {:RESULT = new SwapStmnt(sleft,sright,i1, i2);:}
@@ -324,7 +324,7 @@ print_stmnt ::= PRINT:s print_list:l        {:RESULT = new PrintStmnt(sleft,srig
             ;
 print_list  ::= expr:e COMMA:s print_list:l     {:RESULT = new ExprList(e.line,e.col,e,new ExprList(sleft,sright,new LiteralExpr<String>(-1,-1,"  ",sym.IDENTIFIER_STRING),l));:}
             |   expr:e SEMICOLON print_list:l   {:RESULT = new ExprList(e.line,e.col,e,l);:}
-            |   expr:e                          {:RESULT = new ExprList(e,new ExprList(new LiteralExpr<String>(-1,-1,"\n",sym.IDENTIFIER_STRING),null));:}
+            |   expr:e                          {:RESULT = new ExprList(e.line,e.col,e,new ExprList(-1,-1,new LiteralExpr<String>(-1,-1,"\n",sym.IDENTIFIER_STRING),null));:}
             |   COMMA:s                         {:RESULT = new ExprList(sleft,sright,new LiteralExpr<String>(-1,-1,"  \n",sym.IDENTIFIER_STRING),null);:}
             |   SEMICOLON                       {:RESULT = null;:}
             |   error SEMICOLON
