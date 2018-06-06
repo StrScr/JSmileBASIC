@@ -377,7 +377,9 @@ abstract class Stmnt extends Node {
         } else {
             boolean valid = true;
             for (Node n : children) {
+                curscope = curscope.levelDown();
                 valid = valid && n.semanticTest(curscope, curtable);
+                curscope = curscope.levelUp();
                 if (!valid) {
                     break;
                 }
@@ -1091,7 +1093,7 @@ class VarTable {// TODO Include functions and array types
     }
 }
 
-class Scope {// TODO
+class Scope {
     Scope up;
     ArrayList<Scope> down;
     int mynum;
@@ -1102,7 +1104,7 @@ class Scope {// TODO
         this.up = null;
         this.down = new ArrayList<Scope>();
         this.mynum = 0;
-        this.lastdown = -1;
+        this.lastdown = 0;
         this.curoffset = 0;
     }
 
@@ -1110,23 +1112,30 @@ class Scope {// TODO
         this.up = parent;
         this.down = new ArrayList<Scope>();
         this.mynum = num;
-        this.lastdown = -1;
+        this.lastdown = 0;
         this.curoffset = offset;
     }
 
-    Scope levelUp() {
-        // TODO
-        return null;
+    Scope levelDown() {
+        lastdown++;
+        Scope next = new Scope(this, lastdown, curoffset);
+        down.add(next);
+        return next;
     }
 
-    Scope levelDown() {
-        // TODO
-        return null;
+    Scope levelUp() {
+        return up;
+    }
+
+    void addOffset(int o){
+        // Increase offset by 'o' bytes
+        // Only meant to be used by VarTables
+        curoffset += o;
     }
 
     boolean containsScope(Scope s) {
-        // TODO returns wether argument is contained within current scope
-        return true;
+        // Returns wether sent scope is contained within current scope
+        return s.getTotalScope().startsWith(this.getTotalScope());
     }
 
     String getTotalScope() {
