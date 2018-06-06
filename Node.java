@@ -21,7 +21,7 @@ public abstract class Node {
     abstract boolean semanticTest(Scope curscope, VarTable curtable);
 
     void semanticError(String message){
-        System.out.println("Error Semántico: Ln " + line + ", Col " + col + ": " + message);
+        System.out.println("Error Semantico: Ln " + (line+1) + ", Col " + (col+1) + ": " + message);
     }
 
     void safePrint(Node n, int depth) {
@@ -369,8 +369,8 @@ abstract class Stmnt extends Node {
     }
 
     boolean semanticTest(Scope curscope, VarTable curtable) {
-        // General semantic test, where all children of the current statement get
-        // tested.
+        // General semantic test
+        // All children of the current statement get tested
         Node[] children = getChildren();
         if (children == null) {
             return true;
@@ -498,7 +498,7 @@ class DecStmnt extends Stmnt {
         // Returns true if successful
         boolean valid = curtable.addVariable(id.name, id.type, curscope);
         if(!valid){
-            semanticError("La variable " + id.name + "ya existe dentro de este ambito.");
+            semanticError("La variable " + id.name + " ya existe dentro de este ambito.");
         }
         // If declaration includes assignment, check assignment type compatibility
         if (asig != null) {
@@ -544,13 +544,18 @@ class AssignStmnt extends Stmnt {
             curtable.getVariable(id.name, curscope);
         } catch (Exception e) {
             valid = false;
-            semanticError("La variable " + name + " no existe dentro de este ambito.");
+            semanticError("La variable " + id.name + " no existe dentro de este ambito.");
         }
         // Check assignment type compatibility
         if (!Expr.areCompatibleTypes(id.getSBType(), asig.getSBType())) {
             valid = false;
             semanticError("Tipos incompatibles en asignación de " + id.name + ".");
         }
+        // If it includes an array index, check that too
+        if (arrPos != null){
+            valid = valid && arrPos.semanticTest(curscope, curtable);
+        }
+        return valid && id.semanticTest(curscope, curtable) && asig.semanticTest(curscope, curtable);
     }
 }
 
@@ -920,7 +925,7 @@ class VarList extends Node {
         }
     }
 
-    boolean semanticTest(Scope curscope, VarTable curtable) {
+    boolean semanticTest(Scope curscope, VarTable curtable) { // TODO Check if no repeated variables
         // Variables in a function declaration are not required to be previously
         // declared. No checking is done.
         return true;
@@ -1007,7 +1012,7 @@ class CaseList extends Node {
 
     boolean semanticTest(Scope curscope, VarTable curtable) {
         boolean valid = head.semanticTest(curscope, curtable);
-        if (tail != null) {
+        if (tail == null) {
             return valid;
         } else {
             return valid && tail.semanticTest(curscope, curtable);
@@ -1033,6 +1038,7 @@ class VarTable {// TODO Include functions and array types
             getVariable(identifier, varscope); // Throws error if no variable exists within scope
         } catch (Exception e) {
             table.add(new VarEntry(identifier, type, varscope));
+            System.out.println("DEBUG: Variable added:" + identifier);
             added = true;
         }
         // Return if the variable was added
@@ -1041,9 +1047,11 @@ class VarTable {// TODO Include functions and array types
 
     int getVariable(String identifier, Scope curscope) throws Exception {// TODO Should optimize this for single loop.
         // Find all variables with same identifier
+        //System.out.println("DEBUG: Var Lookup:"+identifier);
         ArrayList<VarEntry> matches = new ArrayList<VarEntry>();
         for (VarEntry e : table) {
-            if (e.identifier == identifier) {
+            //System.out.println("DEBUG: VarTable Lookup:" + e.identifier);
+            if (e.identifier.equals(identifier)) {
                 matches.add(e);
             }
         }
@@ -1054,6 +1062,7 @@ class VarTable {// TODO Include functions and array types
         // Within matching variables, find one with valid scope
         VarEntry found = null;
         for (VarEntry e : matches) {
+            //System.out.println("DEBUG: VarTable Scope:"+e.identifier);
             if (e.scope.containsScope(curscope)) {
                 // No nested variables allowed, so no further validation required
                 found = e;
@@ -1086,6 +1095,14 @@ class Scope {// TODO
     int mynum;
     int lastdown;
     int curoffset;
+
+    public Scope(){
+        this.up = null;
+        this.down = new ArrayList<Scope>();
+        this.mynum = 0;
+        this.lastdown = -1;
+        this.curoffset = 0;
+    }
 
     public Scope(Scope parent, int num, int offset) {
         this.up = parent;
