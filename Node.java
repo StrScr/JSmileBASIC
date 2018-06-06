@@ -1032,6 +1032,7 @@ class VarTable {// TODO Include functions and array types
     }
 
     boolean addVariable(String identifier, int type, Scope varscope) {
+        identifier = identifier.toUpperCase();
         boolean added = false;
         // Check if variable already exists first.
         try {
@@ -1048,6 +1049,7 @@ class VarTable {// TODO Include functions and array types
     int getVariable(String identifier, Scope curscope) throws Exception {// TODO Should optimize this for single loop.
         // Find all variables with same identifier
         //System.out.println("DEBUG: Var Lookup:"+identifier);
+        identifier = identifier.toUpperCase();
         ArrayList<VarEntry> matches = new ArrayList<VarEntry>();
         for (VarEntry e : table) {
             //System.out.println("DEBUG: VarTable Lookup:" + e.identifier);
