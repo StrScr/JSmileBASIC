@@ -377,6 +377,10 @@ abstract class Stmnt extends Node {
         } else {
             boolean valid = true;
             for (Node n : children) {
+                if (n == null) {
+                    System.out.println("DEBUG: Attempted semantic test on null child: " + desc);
+                    continue;
+                }
                 curscope = curscope.levelDown();
                 valid = valid && n.semanticTest(curscope, curtable);
                 curscope = curscope.levelUp();
@@ -927,10 +931,20 @@ class VarList extends Node {
         }
     }
 
-    boolean semanticTest(Scope curscope, VarTable curtable) { // TODO Check if no repeated variables
-        // Variables in a function declaration are not required to be previously
-        // declared. No checking is done.
-        return true;
+    boolean semanticTest(Scope curscope, VarTable curtable) {
+        // Variables in a function declaration are not previously declared.
+        // Add these variables within function scope.
+        VarList l = this;
+        boolean valid = true;
+        do {
+            boolean added = curtable.addVariable(l.head.name, l.head.getType(), curscope);
+            if (!added) {
+                semanticError("Variable " + l.head.name + " ya existe en la lista de variables.");
+            }
+            valid = valid && added;
+            l = l.tail;
+        } while (l != null);
+        return valid;
     }
 }
 
@@ -1068,6 +1082,7 @@ class VarTable {// TODO Include functions and array types
         for (VarEntry e : matches) {
             //System.out.println("DEBUG: VarTable Scope:"+e.identifier);
             if (e.scope.containsScope(curscope)) {
+                //System.out.println("DEBUG: Scope " + e.scope.getTotalScope());
                 // No nested variables allowed, so no further validation required
                 found = e;
                 break;
