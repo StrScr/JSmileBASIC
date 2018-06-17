@@ -1161,3 +1161,54 @@ class Scope {
         }
     }
 }
+
+class Temporal{
+    int id;
+    
+    public Temporal(int id){
+        this.id = id;
+    }
+
+    @Override
+    public String toString(){
+        return "temp" + id;
+    }
+}
+
+class MidCode{
+    int curline;
+    ArrayLisr<CodeQuad> quadlist;
+
+    public MidCode(){
+        this.curline = 1;
+        this.quadlist = new ArrayList<CodeQuad>();
+    }
+
+    public add(CodeQuad cq){
+        quadlist.add(cq);
+        curline++;
+    }
+
+    public GenAsig(Object left, Object right){
+        add(new CodeQuad(":=",right,null,left));
+    }
+
+    public GenJump(int line){
+        add(new CodeQuad("jmp",line,null,null));
+    }
+
+    class CodeQuad{
+        String e1;
+        Object e2, e3, e4;
+        
+        /**
+         * Format: (operator, arg1, arg2, result)
+         */
+        public CodeQuad(String e1, Object e2, Object e3, Object e4){
+            this.e1 = e1;
+            this.e2 = e2;
+            this.e3 = e3;
+            this.e4 = e4;
+        }
+    }
+}
