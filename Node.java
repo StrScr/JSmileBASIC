@@ -20,8 +20,8 @@ public abstract class Node {
 
     abstract boolean semanticTest(Scope curscope, VarTable curtable);
 
-    void semanticError(String message){
-        System.out.println("Error Semantico: Ln " + (line+1) + ", Col " + (col+1) + ": " + message);
+    void semanticError(String message) {
+        System.out.println("Error Semantico: Ln " + (line + 1) + ", Col " + (col + 1) + ": " + message);
     }
 
     void safePrint(Node n, int depth) {
@@ -54,6 +54,8 @@ public abstract class Node {
             }
         return sb.toString();
     }
+
+    abstract Object generateCode(MidCode mc);
 }
 
 /*
@@ -350,7 +352,7 @@ class CallExpr extends Expr {// TODO Proper semantic analysis
         // Check if function exists (Simpler, since no overloaded or nested functions)
         // Check if it's being called with correct arguments
         boolean valid = true;
-        return valid & parameters.semanticTest(curscope, curtable);
+        return valid && parameters.semanticTest(curscope, curtable);
     }
 
     int getType() {// TODO
@@ -503,7 +505,7 @@ class DecStmnt extends Stmnt {
         // Add variable to table. Function validates everything else.
         // Returns true if successful
         boolean valid = curtable.addVariable(id.name, id.type, curscope);
-        if(!valid){
+        if (!valid) {
             semanticError("La variable " + id.name + " ya existe dentro de este ambito.");
         }
         // If declaration includes assignment, check assignment type compatibility
@@ -558,7 +560,7 @@ class AssignStmnt extends Stmnt {
             semanticError("Tipos incompatibles en asignación de " + id.name + ".");
         }
         // If it includes an array index, check that too
-        if (arrPos != null){
+        if (arrPos != null) {
             valid = valid && arrPos.semanticTest(curscope, curtable);
         }
         return valid && id.semanticTest(curscope, curtable) && asig.semanticTest(curscope, curtable);
@@ -1064,11 +1066,11 @@ class VarTable {// TODO Include functions and array types
 
     int getVariable(String identifier, Scope curscope) throws Exception {// TODO Should optimize this for single loop.
         // Find all variables with same identifier
-        //System.out.println("DEBUG: Var Lookup:"+identifier);
+        // System.out.println("DEBUG: Var Lookup:"+identifier);
         identifier = identifier.toUpperCase();
         ArrayList<VarEntry> matches = new ArrayList<VarEntry>();
         for (VarEntry e : table) {
-            //System.out.println("DEBUG: VarTable Lookup:" + e.identifier);
+            // System.out.println("DEBUG: VarTable Lookup:" + e.identifier);
             if (e.identifier.equals(identifier)) {
                 matches.add(e);
             }
@@ -1080,9 +1082,9 @@ class VarTable {// TODO Include functions and array types
         // Within matching variables, find one with valid scope
         VarEntry found = null;
         for (VarEntry e : matches) {
-            //System.out.println("DEBUG: VarTable Scope:"+e.identifier);
+            // System.out.println("DEBUG: VarTable Scope:"+e.identifier);
             if (e.scope.containsScope(curscope)) {
-                //System.out.println("DEBUG: Scope " + e.scope.getTotalScope());
+                // System.out.println("DEBUG: Scope " + e.scope.getTotalScope());
                 // No nested variables allowed, so no further validation required
                 found = e;
                 break;
@@ -1115,7 +1117,7 @@ class Scope {
     int lastdown;
     int curoffset;
 
-    public Scope(){
+    public Scope() {
         this.up = null;
         this.down = new ArrayList<Scope>();
         this.mynum = 0;
@@ -1142,7 +1144,7 @@ class Scope {
         return up;
     }
 
-    void addOffset(int o){
+    void addOffset(int o) {
         // Increase offset by 'o' bytes
         // Only meant to be used by VarTables
         curoffset += o;
@@ -1162,53 +1164,85 @@ class Scope {
     }
 }
 
-class Temporal{
+class Temporal {
     int id;
-    
-    public Temporal(int id){
+
+    public Temporal(int id) {
         this.id = id;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "temp" + id;
     }
 }
 
-class MidCode{
-    int curline;
+class MidCode {
+    int nextline;
     ArrayLisr<CodeQuad> quadlist;
 
-    public MidCode(){
-        this.curline = 1;
+    public MidCode() {
+        this.nextline = 1;
         this.quadlist = new ArrayList<CodeQuad>();
     }
 
-    public add(CodeQuad cq){
+    public CodeQuad add(CodeQuad cq) {
         quadlist.add(cq);
-        curline++;
+        nextline++;
+        return cq;
     }
 
-    public GenAsig(Object left, Object right){
-        add(new CodeQuad(":=",right,null,left));
+    public CodeQuad GenAsig(Object left, Object right) {
+        return add(new CodeQuad(":=", right, null, left));
     }
 
-    public GenJump(int line){
-        add(new CodeQuad("jmp",line,null,null));
+    public CodeQuad GenJump(int line) {
+        return add(new CodeQuad("jmp", line, null, null));
     }
 
-    class CodeQuad{
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (CodeQuad c : quadlist) {
+            sb.append(c.toString() + "\n");
+        }
+        return sb.toString();
+    }
+
+    class CodeQuad {
         String e1;
         Object e2, e3, e4;
-        
+
         /**
-         * Format: (operator, arg1, arg2, result)
+         * Defines a code quadruple. Only the operator is obligatory; the rest can be
+         * null. Format: (operator, arg1, arg2, result)
+         * 
+         * @param oper The operator, written as a string. E.g.: ":=", "goto", etc.
+         * @param arg1 The first argument. Can be anything, depending on operator.
+         * @param arg2 The second argument. Same as the first.
+         * @param res  The result. Will usually be something you can store to (E.g.:
+         *             variable, temporal), but can vary.
          */
-        public CodeQuad(String e1, Object e2, Object e3, Object e4){
-            this.e1 = e1;
-            this.e2 = e2;
-            this.e3 = e3;
-            this.e4 = e4;
+        public CodeQuad(String oper, Object arg1, Object arg2, Object res) {
+            this.e1 = oper;
+            this.e2 = arg1;
+            this.e3 = arg2;
+            this.e4 = res;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(e1);
+            if (e2 != null) {
+                sb.append(", " + e2.toString());
+            }
+            if (e3 != null) {
+                sb.append(", " + e3.toString());
+            }
+            if (e4 != null) {
+                sb.append(", " + e4.toString());
+            }
+            return sb.toString();
         }
     }
 }
