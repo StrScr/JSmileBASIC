@@ -349,8 +349,18 @@ class CallExpr extends Expr {// TODO Proper semantic analysis
     boolean semanticTest(Scope curscope, VarTable curtable) {// TODO
         // Check if function exists (Simpler, since no overloaded or nested functions)
         // Check if it's being called with correct arguments
-        boolean valid = true;
+        boolean valid;
+        try {
+            curtable.getVariable(name, curscope);
+            valid = true;
+        } catch (Exception e) {
+            semanticError("La funcion " + name + " no existe dentro de este ambito.");
+            valid = false;
+        }
         return valid & parameters.semanticTest(curscope, curtable);
+        
+        /*boolean valid = true;
+        return valid & parameters.semanticTest(curscope, curtable);*/
     }
 
     int getType() {// TODO
@@ -502,6 +512,8 @@ class DecStmnt extends Stmnt {
     boolean semanticTest(Scope curscope, VarTable curtable) {// TODO Handle arrays
         // Add variable to table. Function validates everything else.
         // Returns true if successful
+        boolean array[]  = new boolean[arrSize.getType()];
+        
         boolean valid = curtable.addVariable(id.name, id.type, curscope);
         if(!valid){
             semanticError("La variable " + id.name + " ya existe dentro de este ambito.");
@@ -513,7 +525,12 @@ class DecStmnt extends Stmnt {
                 semanticError("Tipos incompatibles en inicialización de " + id.name + ".");
             }
         }
+        for (int i = 0; i < array.length; i++) 
+          array[i]=false;
+        
         return valid;
+        
+      
     }
 }
 

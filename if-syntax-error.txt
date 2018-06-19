@@ -1,0 +1,11 @@
+MID$("ABCDE" , 0 , 3)
+MID$("ABCDE" , 1 , 3)
+MID$("ABCDE" , 2 , 3)
+
+IF letras[i] == "A" THEN
+    CONTINUE
+
+ELSEIF letras[i] == "B" THEN
+        BREAK
+    ELSE
+       resultado = letras[i]
