@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+//import jsmilebasic.Expr.SBType;
 
 public abstract class Node {
     String desc;
@@ -351,7 +352,7 @@ class CallExpr extends Expr {// TODO Proper semantic analysis
         // Check if it's being called with correct arguments
         boolean valid;
         try {
-            curtable.getVariable(name, curscope);
+            curtable.getFunction(desc, SBType.SB_INT);
             valid = true;
         } catch (Exception e) {
             semanticError("La funcion " + name + " no existe dentro de este ambito.");
@@ -1059,11 +1060,16 @@ class CaseList extends Node {
 
 class VarTable {// TODO Include functions and array types
     ArrayList<VarEntry> table;
+    ArrayList<ArrEntry> table2;
+    ArrayList<FuncEntry> table3;
 
     public VarTable() {
         table = new ArrayList<VarEntry>();
+        table2 = new ArrayList<ArrEntry>();
+        table3 = new ArrayList<FuncEntry>();
     }
 
+    
     boolean addVariable(String identifier, int type, Scope varscope) {
         identifier = identifier.toUpperCase();
         boolean added = false;
@@ -1110,6 +1116,128 @@ class VarTable {// TODO Include functions and array types
             throw new Exception();
         }
         return found.type;
+    }
+
+     boolean addArray(String identifier, SBType sbtype, Scope arrscope, int size) {
+        identifier = identifier.toUpperCase();
+        boolean added = false;
+        // Check if array already exists first.
+        try {
+            getArray(identifier, sbtype, arrscope); // Throws error if no array exists within scope
+        } catch (Exception e) {
+            table2.add(new ArrEntry(identifier, sbtype, arrscope, size));
+            System.out.println("DEBUG: Arreglo added:" + identifier);
+            added = true;
+        }
+        // Return if the array was added
+        return added;
+    }
+
+    int getArray(String identifier, SBType sbtype, Scope curscope) throws Exception {// TODO Should optimize this for single loop.
+        identifier = identifier.toUpperCase();
+        ArrayList<ArrEntry> matches = new ArrayList<ArrEntry>();
+        for (ArrEntry e : table2) {
+            if (e.identifier.equals(identifier)) {
+                matches.add(e);
+            }
+        }
+        // If no matches were found, throw an exception
+        if (matches.isEmpty()) {
+            throw new Exception();
+        }
+        // Within matching arrays, find one with valid scope
+        ArrEntry found = null;
+        for (ArrEntry e : matches) {
+            if (e.scope.containsScope(curscope)) {
+                // No nested arrays allowed, so no further validation required
+                found = e;
+                break;
+            }
+        }
+        // If no suiting array was found, throw an exception
+        if (found == null) {
+            throw new Exception();
+        }
+        return found.size;
+    }
+    
+     boolean addFunction(String identifier, SBType r_sbtype, SBType params[]) {
+        identifier = identifier.toUpperCase();
+        boolean added = false;
+        // Check if function already exists first.
+        try {
+            getFunction(identifier, r_sbtype); // Throws error if no function exists within scope
+        } catch (Exception e) {
+            table3.add(new FuncEntry(identifier, r_sbtype, params));
+            System.out.println("DEBUG: Function added:" + identifier);
+            added = true;
+        }
+        // Return if the function was added
+        return added;
+    }
+
+    SBType[] getFunction(String identifier, SBType cursbtype) throws Exception {// TODO Should optimize this for single loop.
+        identifier = identifier.toUpperCase();
+        ArrayList<FuncEntry> matches = new ArrayList<FuncEntry>();
+        for (FuncEntry e : table3) {
+            if (e.identifier.equals(identifier)) {
+                matches.add(e);
+            }
+        }
+        // If no matches were found, throw an exception
+        if (matches.isEmpty()) {
+            throw new Exception();
+        }
+        // Within matching functions, find one with valid scope
+       FuncEntry found = null;
+        /*for (FuncEntry e : matches) {
+            if (e.r_sbtype.) {
+                found = e;
+                break;
+            }
+        }*/
+        
+        if (found == null) {
+            throw new Exception();
+        }
+        return found.params;
+    }
+    
+    class ArrEntry {
+        String identifier;
+        SBType sbtype;
+        Scope scope;
+        int size;
+        
+        public ArrEntry(String identifier, SBType sbtype, Scope arrscope, int size) {
+           this.identifier=identifier;
+           this.sbtype=sbtype;
+           this.scope=arrscope;
+           this.size=size;
+        }
+    }
+
+    class FuncEntry {
+        String identifier;
+        SBType r_sbtype;
+        SBType params[];
+        
+        public FuncEntry(String identifier, SBType r_sbtype, SBType params[]) {
+           this.identifier=identifier;
+           this.r_sbtype=r_sbtype;
+           this.params=params;
+        }
+        
+        public SBType getR_SBType(){
+            return r_sbtype;
+        }
+        
+        public SBType[] getParams(SBType X[]) {
+            SBType A[] = new SBType[X.length];
+            for (int i=0; i<X.length; i++)
+                A[i] = X[i];
+            return A;
+        }
     }
 
     class VarEntry {
