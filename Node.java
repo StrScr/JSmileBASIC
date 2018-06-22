@@ -513,7 +513,11 @@ class DecStmnt extends Stmnt {
     boolean semanticTest(Scope curscope, VarTable curtable) {// TODO Handle arrays
         // Add variable to table. Function validates everything else.
         // Returns true if successful
-        boolean array[]  = new boolean[arrSize.getType()];
+        
+        boolean array = curtable.addArray(id.name, SBType.SB_INT, curscope, line);
+        if(!array){
+            semanticError("El arreglo " + id.name + " ya existe dentro de este ambito.");
+        }
         
         boolean valid = curtable.addVariable(id.name, id.type, curscope);
         if(!valid){
@@ -526,8 +530,6 @@ class DecStmnt extends Stmnt {
                 semanticError("Tipos incompatibles en inicialización de " + id.name + ".");
             }
         }
-        for (int i = 0; i < array.length; i++) 
-          array[i]=false;
         
         return valid;
         
@@ -1154,6 +1156,13 @@ class VarTable {// TODO Include functions and array types
                 break;
             }
         }
+        
+        for (ArrEntry e : matches) {
+            if (e.sbtype.equals(sbtype)) {
+                found = e;
+                break;
+            }
+        }
         // If no suiting array was found, throw an exception
         if (found == null) {
             throw new Exception();
@@ -1190,12 +1199,12 @@ class VarTable {// TODO Include functions and array types
         }
         // Within matching functions, find one with valid scope
        FuncEntry found = null;
-        /*for (FuncEntry e : matches) {
-            if (e.r_sbtype.) {
+        for (FuncEntry e : matches) {
+            if (e.r_sbtype.equals(cursbtype)) {
                 found = e;
                 break;
             }
-        }*/
+        }
         
         if (found == null) {
             throw new Exception();
