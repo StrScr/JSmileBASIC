@@ -60,11 +60,11 @@ public abstract class Node {
 /*
  * Expressions & Endings
  */
-
-abstract class Expr extends Node {
-    enum SBType {
+enum SBType {
         SB_INT, SB_DOUBLE, SB_STRING, SB_INT_ARR, SB_DOUBLE_ARR, SB_STRING_ARR, SB_TYPE_ERROR
     }
+abstract class Expr extends Node {
+    
 
     protected Expr(int l, int c) {
         super(l, c);
