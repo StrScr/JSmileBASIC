@@ -791,6 +791,22 @@ class DefStmnt extends Stmnt {
         Node[] children = { arguments, returnVals, list };
         return children;
     }
+	
+	boolean semanticTest(Scope curscope, VarTable curtable) {
+        // Variables in a function declaration are not previously declared.
+        // Add these variables within function scope.
+        DefStmnt l = this;
+        boolean valid = true;
+        do {
+            boolean added = curtable.addFunction(l.name, SBType.SB_INT, SBType.values());
+            if (!added) {
+                semanticError("Función " + l.name + " ya existe en la lista de funciones.");
+            }
+            valid = valid && added;
+           
+        } while (l != null);
+        return valid;
+    }
 }
 
 class RetStmnt extends Stmnt {
