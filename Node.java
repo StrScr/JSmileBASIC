@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public abstract class Node {
     String desc;
@@ -55,7 +57,7 @@ public abstract class Node {
         return sb.toString();
     }
 
-    abstract Object generateCode(MidCode mc);
+    abstract void generateCode(MidCode mc);
 }
 
 /*
@@ -156,6 +158,16 @@ abstract class Expr extends Node {
 class BinExpr extends Expr {
     Expr e1, e2;
     int op;
+    static Map<Integer, String> opNames;
+
+    static {
+        //TODO Complete for all operators
+        opNames = new HashMap<Integer, String>();
+        opNames.put(sym.PLUS, "+");
+        opNames.put(sym.MINUS, "-");
+        opNames.put(sym.MULT, "*");
+        opNames.put(sym.DIV, "/");
+    }
 
     public BinExpr(int l, int c, Expr e1, Expr e2, int op) {
         super(l, c);
@@ -218,6 +230,16 @@ class BinExpr extends Expr {
             }
         }
     }
+
+    void generateCode(MidCode mc){
+        e1.generateCode(mc);
+        Object l1 = mc.props.remove("lugar");
+        e2.generateCode(mc);
+        Object l2 = mc.props.remove("lugar");
+        Temporal res = mc.newTemp();
+        mc.GenAsigOp(res, opNames.get(op), l1, l2);
+        mc.props.put("lugar", res);
+    }
 }
 
 class UnExpr extends Expr {
@@ -257,6 +279,12 @@ class UnExpr extends Expr {
     int getType() {
         return e.getType();
     }
+
+    void generateCode(MidCode mc){
+        e.generateCode(mc);
+        //TODO Only generates for unary minus, not other unary operators
+        mc.add(new MidCode.CodeQuad("=u-", mc.props.remove("lugar"), null, mc.newTemp()));
+    }
 }
 
 class IdExpr extends Expr {
@@ -295,6 +323,11 @@ class IdExpr extends Expr {
     int getType() {
         return type;
     }
+
+    void generateCode(MidCode mc){
+        //TODO Proper return?
+        mc.props.put("lugar", name);
+    }
 }
 
 class LiteralExpr<T> extends Expr {
@@ -323,6 +356,10 @@ class LiteralExpr<T> extends Expr {
 
     int getType() {
         return type;
+    }
+
+    void generateCode(MidCode mc){
+        mc.props.put("lugar", value);
     }
 }
 
@@ -358,6 +395,10 @@ class CallExpr extends Expr {// TODO Proper semantic analysis
     int getType() {// TODO
         // Check return type for function
         return sym.IDENTIFIER_INTEGER;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -437,6 +478,13 @@ class StmntList extends Node {
             return valid && tail.semanticTest(curscope, curtable);
         }
     }
+
+    void generateCode(MidCode mc){
+        head.generateCode(mc);
+        if(tail!=null){
+            tail.generateCode(mc);
+        }
+    }
 }
 
 class SimpleStmnt extends Stmnt {
@@ -455,6 +503,10 @@ class SimpleStmnt extends Stmnt {
     Node[] getChildren() {
         return null;
     }
+
+    void generateCode(MidCode mc){
+        //TODO Have to generate different code for each type
+    }
 }
 
 class LabelStmnt extends Stmnt {
@@ -472,6 +524,10 @@ class LabelStmnt extends Stmnt {
 
     Node[] getChildren() {
         return null;
+    }
+
+    void generateCode(MidCode mc){
+        mc.GenLabel(new CustomLabel(name));
     }
 }
 
@@ -516,6 +572,10 @@ class DecStmnt extends Stmnt {
             }
         }
         return valid;
+    }
+
+    void generateCode(MidCode mc){
+        // Declaraion should not generate code
     }
 }
 
@@ -565,6 +625,10 @@ class AssignStmnt extends Stmnt {
         }
         return valid && id.semanticTest(curscope, curtable) && asig.semanticTest(curscope, curtable);
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class IfStmnt extends Stmnt {
@@ -591,6 +655,10 @@ class IfStmnt extends Stmnt {
         Node[] children = { condition, onTrue, onFalse };
         return children;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class OnStmnt extends Stmnt {
@@ -613,6 +681,10 @@ class OnStmnt extends Stmnt {
     Node[] getChildren() {
         Node[] children = { switchvalue, cases };
         return children;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -645,6 +717,10 @@ class Case extends Node {
                 // true), but we do it anyways.
             return mcase.semanticTest(curscope, curtable) && list.semanticTest(curscope, curtable);
         }
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -679,6 +755,10 @@ class ForStmnt extends Stmnt {
         Node[] children = { control, asig, limit, step, list };
         return children;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class WhileStmnt extends Stmnt {
@@ -701,6 +781,10 @@ class WhileStmnt extends Stmnt {
     Node[] getChildren() {
         Node[] children = { condition, list };
         return children;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -725,6 +809,10 @@ class RepeatStmnt extends Stmnt {
         Node[] children = { condition, list };
         return children;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class GotoStmnt extends Stmnt {
@@ -744,6 +832,10 @@ class GotoStmnt extends Stmnt {
 
     Node[] getChildren() {
         return null;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -773,6 +865,10 @@ class DefStmnt extends Stmnt {
         Node[] children = { arguments, returnVals, list };
         return children;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class RetStmnt extends Stmnt {
@@ -792,6 +888,10 @@ class RetStmnt extends Stmnt {
     Node[] getChildren() {
         Node[] children = { value };
         return children;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -819,6 +919,10 @@ class CallStmnt extends Stmnt {
         Node[] children = { parameters, returnVals };
         return children;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class SwapStmnt extends Stmnt {
@@ -841,6 +945,10 @@ class SwapStmnt extends Stmnt {
         Node[] children = { id1, id2 };
         return children;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class PrintStmnt extends Stmnt {
@@ -860,6 +968,10 @@ class PrintStmnt extends Stmnt {
     Node[] getChildren() {
         Node[] children = { list };
         return children;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -882,6 +994,10 @@ class InputStmnt extends Stmnt {
     Node[] getChildren() {
         Node[] children = { list };
         return children;
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -948,6 +1064,10 @@ class VarList extends Node {
         } while (l != null);
         return valid;
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class ExprList extends Node {
@@ -992,6 +1112,10 @@ class ExprList extends Node {
             return valid && tail.semanticTest(curscope, curtable);
         }
     }
+
+    void generateCode(MidCode mc){
+        //TODO
+    }
 }
 
 class CaseList extends Node {
@@ -1035,6 +1159,10 @@ class CaseList extends Node {
         } else {
             return valid && tail.semanticTest(curscope, curtable);
         }
+    }
+
+    void generateCode(MidCode mc){
+        //TODO
     }
 }
 
@@ -1177,27 +1305,94 @@ class Temporal {
     }
 }
 
+class Label{
+    int id;
+
+    public Label(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "etiq" + id;
+    }
+}
+
+class CustomLabel extends Label{
+    String name;
+
+    public CustomLabel(String n){
+        super(-1);
+        this.name = n;
+    }
+
+    @Override
+    public String toString(){
+        return "cust_" + name;
+    }
+}
+
 class MidCode {
     int nextline;
-    ArrayLisr<CodeQuad> quadlist;
+    int nexttemp;
+    protected int nextlabel;
+    Map<String, Object> props;
+    ArrayList<CodeQuad> quadlist;
 
     public MidCode() {
         this.nextline = 1;
+        this.nexttemp = 0;
+        this.nextlabel = 0;
+        this.props = new HashMap<String, Object>();
         this.quadlist = new ArrayList<CodeQuad>();
     }
 
-    public CodeQuad add(CodeQuad cq) {
+    Temporal newTemp(){
+        return new Temporal(nexttemp++);
+    }
+
+    Label newEtiq(){
+        return new Label(nextlabel++);
+    }
+
+    CodeQuad add(CodeQuad cq) {
         quadlist.add(cq);
         nextline++;
         return cq;
     }
 
-    public CodeQuad GenAsig(Object left, Object right) {
+    CodeQuad GenAsigOp(Object res, String op, Object arg1, Object arg2){
+        switch (op) {
+            case "+":{
+                return add(new CodeQuad("=+", arg1, arg2, res));
+            }
+            case "-":{
+                return add(new CodeQuad("=-", arg1, arg2, res));
+            }
+            case "*":{
+                return add(new CodeQuad("=*", arg1, arg2, res));
+            }
+            case "/":{
+                return add(new CodeQuad("=/", arg1, arg2, res));
+            }
+            default:{
+                System.out.println("Error de Generacion Intermedia: Operador especificado para asignacion desconocido: " + op);
+                break;
+            }
+        }
+        return null;
+    }
+
+    CodeQuad GenAsig(Object left, Object right) {
         return add(new CodeQuad(":=", right, null, left));
     }
 
-    public CodeQuad GenJump(int line) {
-        return add(new CodeQuad("jmp", line, null, null));
+    CodeQuad GenJump(Label l) {
+        return add(new CodeQuad("jmp", l, null, null));
+    }
+
+    CodeQuad GenLabel(Label l){
+        return add(new CodeQuad("@", l, null, null));
     }
 
     @Override
